@@ -62,7 +62,7 @@ export default function Login() {
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
         <div className="flex justify-center mb-6">
           <Image 
-            src="/logo.png" 
+            src="/logo-svnit.png" 
             alt="SVNIT Logo" 
             width={100} 
             height={100} 
@@ -70,7 +70,7 @@ export default function Login() {
           />
         </div>
         <h1 className="text-2xl font-bold text-center mb-6 text-black">
-          College Clubs Documentation System
+          College Activities Documentation System
         </h1>
         
         {error && (

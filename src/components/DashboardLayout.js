@@ -74,7 +74,7 @@ export default function DashboardLayout({ children }) {
               </button>
               <div className="flex items-center">
                 <Image 
-                  src="/logo.png" 
+                  src="/logo-svnit.png" 
                   alt="SVNIT Logo" 
                   width={40} 
                   height={40} 
@@ -121,7 +121,7 @@ export default function DashboardLayout({ children }) {
               <div className="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
                 <div className="px-4 mb-5 flex items-center">
                   <Image 
-                    src="/logo.png" 
+                    src="/logo-svnit.png" 
                     alt="SVNIT Logo" 
                     width={40} 
                     height={40} 
@@ -152,7 +152,7 @@ export default function DashboardLayout({ children }) {
               <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
                 <div className="px-4 mb-5 flex items-center">
                   <Image 
-                    src="/logo.png" 
+                    src="/logo-svnit.png" 
                     alt="SVNIT Logo" 
                     width={40} 
                     height={40} 
