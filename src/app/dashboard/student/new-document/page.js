@@ -56,6 +56,11 @@ export default function NewDocument() {
     facultyChairmanDesignation: '',
     facultyChairmanDept: '',
     facultyChairmanMobile: '',
+    
+    // Financial Proposal
+    financialProposal: [
+      { item: '', amount: '' }
+    ],
   });
   
   // Form validation errors
@@ -488,7 +493,88 @@ export default function NewDocument() {
                 )}
               </div>
             </div>
-            
+
+            {/* Financial Proposal dynamic table */}
+            <div className="bg-gray-50 p-4 rounded-md mb-6">
+              <h2 className="text-lg font-semibold mb-4 text-gray-800">Financial Proposal</h2>
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200 bg-white rounded-md shadow">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item/Description</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount (₹)</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {formData.financialProposal.map((row, index) => (
+                      <tr key={index}>
+                        <td className="px-6 py-4">
+                          <input
+                            type="text"
+                            value={row.item}
+                            onChange={(e) => {
+                              const newFinancialProposal = [...formData.financialProposal];
+                              newFinancialProposal[index].item = e.target.value;
+                              setFormData({ ...formData, financialProposal: newFinancialProposal });
+                            }}
+                            placeholder="Enter item/description"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+                          />
+                        </td>
+                        <td className="px-6 py-4">
+                          <input
+                            type="number"
+                            value={row.amount}
+                            onChange={(e) => {
+                              const newFinancialProposal = [...formData.financialProposal];
+                              newFinancialProposal[index].amount = e.target.value;
+                              setFormData({ ...formData, financialProposal: newFinancialProposal });
+                            }}
+                            placeholder="0"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+                          />
+                        </td>
+                        <td className="px-6 py-4">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newFinancialProposal = formData.financialProposal.filter((_, i) => i !== index);
+                              setFormData({ ...formData, financialProposal: newFinancialProposal });
+                            }}
+                            className="text-red-600 hover:text-red-900 font-medium"
+                            disabled={formData.financialProposal.length === 1}
+                          >
+                            Remove
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                    {/* Total row */}
+                    <tr className="bg-gray-50 font-semibold">
+                      <td className="px-6 py-4 text-right text-black">Total:</td>
+                      <td className="px-6 py-4 text-black">
+                        ₹{formData.financialProposal.reduce((total, row) => total + (parseFloat(row.amount) || 0), 0).toLocaleString()}
+                      </td>
+                      <td className="px-6 py-4"></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div className="mt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newFinancialProposal = [...formData.financialProposal, { item: '', amount: '' }];
+                    setFormData({ ...formData, financialProposal: newFinancialProposal });
+                  }}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  + Add Row
+                </button>
+              </div>
+            </div>
+
             {/* Student Head Information */}
             <div className="bg-gray-50 p-4 rounded-md mb-6">
               <h2 className="text-lg font-semibold mb-4 text-gray-800">Student Head Information</h2>

@@ -69,7 +69,7 @@ export default function Login() {
             className="h-16 w-auto"
           />
         </div>
-        <h1 className="text-2xl font-bold text-center mb-6">
+        <h1 className="text-2xl font-bold text-center mb-6 text-black">
           College Clubs Documentation System
         </h1>
         
