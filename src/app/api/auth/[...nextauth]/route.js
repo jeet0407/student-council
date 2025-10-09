@@ -3,7 +3,7 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import dbConnect from '@/lib/mongoose';
 import User from '@/models/User';
 
-const handler = NextAuth({
+export const authOptions = {
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -12,22 +12,33 @@ const handler = NextAuth({
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        await dbConnect();
-        
-        // Find the user in the database
-        const user = await User.findOne({ email: credentials.email });
-        
-        // Simple password check (in real app use bcrypt)
-        if (user && credentials.password === user.password) {
-          return {
-            id: user._id.toString(),
-            name: user.name,
-            email: user.email,
-            role: user.role,
-          };
+        try {
+          await dbConnect();
+          
+          console.log('Attempting to authenticate:', credentials.email);
+          
+          // Find the user in the database
+          const user = await User.findOne({ email: credentials.email });
+          
+          console.log('User found:', user ? 'Yes' : 'No');
+          
+          // Simple password check (in real app use bcrypt)
+          if (user && credentials.password === user.password) {
+            console.log('Authentication successful for:', credentials.email);
+            return {
+              id: user._id.toString(),
+              name: user.name,
+              email: user.email,
+              role: user.role,
+            };
+          }
+          
+          console.log('Authentication failed for:', credentials.email);
+          return null;
+        } catch (error) {
+          console.error('Authentication error:', error);
+          return null;
         }
-        
-        return null;
       }
     })
   ],
@@ -52,6 +63,8 @@ const handler = NextAuth({
     strategy: "jwt",
   },
   secret: process.env.NEXTAUTH_SECRET,
-});
+};
+
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };
