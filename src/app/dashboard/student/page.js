@@ -59,7 +59,7 @@ export default function StudentDashboard() {
     <DashboardLayout>
       <div className="container mx-auto px-4 py-6">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Student Head Dashboard</h1>
+          <h1 className="text-2xl font-bold text-black">Student Head Dashboard</h1>
           <button 
             onClick={() => router.push('/dashboard/student/new-document')}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"
@@ -70,7 +70,7 @@ export default function StudentDashboard() {
 
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="p-6">
-            <h2 className="text-xl font-semibold mb-4">My Documents</h2>
+            <h2 className="text-xl font-semibold mb-4 text-black">My Documents</h2>
             
             {documents.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
