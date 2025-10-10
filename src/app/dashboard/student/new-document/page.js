@@ -218,7 +218,7 @@ export default function NewDocument() {
     <DashboardLayout>
       <div className="container mx-auto px-4 py-6">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Create New Document</h1>
+          <h1 className="text-2xl text-black font-bold">Create New Document</h1>
         </div>
         
         <div className="bg-white shadow-md rounded-lg p-6 mb-8">
@@ -604,7 +604,7 @@ export default function NewDocument() {
                     id="studentHeadName"
                     value={formData.studentHeadName}
                     onChange={handleChange}
-                    placeholder="Purv Kabaria"
+                    placeholder="Student Head Name"
                     className={`w-full px-3 py-2 border ${errors.studentHeadName ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black`}
                   />
                   {errors.studentHeadName && (
@@ -622,7 +622,7 @@ export default function NewDocument() {
                     id="studentHeadRollNo"
                     value={formData.studentHeadRollNo}
                     onChange={handleChange}
-                    placeholder="U23CS064"
+                    placeholder="Student Head Roll No."
                     className={`w-full px-3 py-2 border ${errors.studentHeadRollNo ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black`}
                   />
                   {errors.studentHeadRollNo && (
@@ -640,7 +640,7 @@ export default function NewDocument() {
                     id="studentHeadBranch"
                     value={formData.studentHeadBranch}
                     onChange={handleChange}
-                    placeholder="CSE"
+                    placeholder="Student Head Branch"
                     className={`w-full px-3 py-2 border ${errors.studentHeadBranch ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black`}
                   />
                   {errors.studentHeadBranch && (
@@ -658,7 +658,7 @@ export default function NewDocument() {
                     id="studentHeadMobile"
                     value={formData.studentHeadMobile}
                     onChange={handleChange}
-                    placeholder="9724484681"
+                    placeholder="Student Head Mobile No."
                     className={`w-full px-3 py-2 border ${errors.studentHeadMobile ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black`}
                   />
                   {errors.studentHeadMobile && (
@@ -682,7 +682,7 @@ export default function NewDocument() {
                     id="studentSecretaryName"
                     value={formData.studentSecretaryName}
                     onChange={handleChange}
-                    placeholder="Aviskar Jha"
+                    placeholder="Student Secretary Name"
                     className={`w-full px-3 py-2 border ${errors.studentSecretaryName ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black`}
                   />
                   {errors.studentSecretaryName && (
@@ -700,7 +700,7 @@ export default function NewDocument() {
                     id="studentSecretaryRollNo"
                     value={formData.studentSecretaryRollNo}
                     onChange={handleChange}
-                    placeholder="U23EE041"
+                    placeholder="Student Secretary Roll No."
                     className={`w-full px-3 py-2 border ${errors.studentSecretaryRollNo ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black`}
                   />
                   {errors.studentSecretaryRollNo && (
@@ -718,7 +718,7 @@ export default function NewDocument() {
                     id="studentSecretaryBranch"
                     value={formData.studentSecretaryBranch}
                     onChange={handleChange}
-                    placeholder="EE"
+                    placeholder="Student Secretary Branch"
                     className={`w-full px-3 py-2 border ${errors.studentSecretaryBranch ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black`}
                   />
                   {errors.studentSecretaryBranch && (
@@ -736,7 +736,7 @@ export default function NewDocument() {
                     id="studentSecretaryMobile"
                     value={formData.studentSecretaryMobile}
                     onChange={handleChange}
-                    placeholder="9724484681"
+                    placeholder="Student Secretary Mobile No."
                     className={`w-full px-3 py-2 border ${errors.studentSecretaryMobile ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black`}
                   />
                   {errors.studentSecretaryMobile && (
