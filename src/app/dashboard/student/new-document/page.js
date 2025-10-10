@@ -133,6 +133,18 @@ export default function NewDocument() {
       }
     });
     
+    // Financial proposal validation
+    if (!formData.financialProposal || formData.financialProposal.length === 0) {
+      newErrors.financialProposal = 'At least one financial item is required';
+    } else {
+      const hasValidItems = formData.financialProposal.some(item => 
+        item.item.trim() !== '' && item.amount !== '' && parseFloat(item.amount) > 0
+      );
+      if (!hasValidItems) {
+        newErrors.financialProposal = 'At least one item with valid description and amount is required';
+      }
+    }
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -573,6 +585,9 @@ export default function NewDocument() {
                   + Add Row
                 </button>
               </div>
+              {errors.financialProposal && (
+                <p className="mt-2 text-sm text-red-600">{errors.financialProposal}</p>
+              )}
             </div>
 
             {/* Student Head Information */}

@@ -78,6 +78,9 @@ export async function POST(req) {
         mobile: formData.facultyChairmanMobile || '',
       },
       
+      // Financial proposal
+      financialProposal: formData.financialProposal || [{ item: '', amount: 0 }],
+      
       // Other document metadata
       status: 'pending_student_signature',
       createdBy: user._id,

@@ -96,10 +96,11 @@ const DocumentSchema = new mongoose.Schema({
     mobile: { type: String, required: true },
   },
   
-  // Financial details (can be added later)
-  financialDetails: {
-    type: Object,
-  },
+  // Financial details
+  financialProposal: [{
+    item: { type: String, required: true },
+    amount: { type: Number, required: true, min: 0 }
+  }],
   
   // Document metadata
   status: {

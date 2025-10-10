@@ -61,13 +61,13 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
         <div className="flex justify-center mb-6">
-          <Image 
+          {/* <Image 
             src="/logo.png" 
             alt="SVNIT Logo" 
             width={100} 
             height={100} 
             className="h-16 w-auto"
-          />
+          /> */}
         </div>
         <h1 className="text-2xl font-bold text-center mb-6 text-black">
           College Clubs Documentation System

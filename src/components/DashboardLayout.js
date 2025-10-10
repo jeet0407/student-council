@@ -73,13 +73,13 @@ export default function DashboardLayout({ children }) {
                 </svg>
               </button>
               <div className="flex items-center">
-                <Image 
+                {/* <Image 
                   src="/logo.png" 
                   alt="SVNIT Logo" 
                   width={40} 
                   height={40} 
                   className="h-8 w-auto"
-                />
+                /> */}
                 <h1 className="ml-2 text-lg font-medium text-gray-900">SVNIT Clubs Portal</h1>
               </div>
             </div>
@@ -120,13 +120,13 @@ export default function DashboardLayout({ children }) {
               </div>
               <div className="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
                 <div className="px-4 mb-5 flex items-center">
-                  <Image 
+                  {/* <Image 
                     src="/logo.png" 
                     alt="SVNIT Logo" 
                     width={40} 
                     height={40} 
                     className="h-8 w-auto"
-                  />
+                  /> */}
                   <h2 className="ml-2 text-lg font-medium text-gray-900">SVNIT Clubs Portal</h2>
                 </div>
                 <nav className="px-2 space-y-1">
@@ -151,13 +151,13 @@ export default function DashboardLayout({ children }) {
             <div className="flex flex-col h-0 flex-1 bg-white border-r border-gray-200">
               <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
                 <div className="px-4 mb-5 flex items-center">
-                  <Image 
+                  {/* <Image 
                     src="/logo.png" 
                     alt="SVNIT Logo" 
                     width={40} 
                     height={40} 
                     className="h-8 w-auto"
-                  />
+                  /> */}
                   <h2 className="ml-2 text-lg font-medium text-gray-900">Navigation</h2>
                 </div>
                 <nav className="flex-1 px-2 bg-white space-y-1">
