@@ -1042,7 +1042,7 @@ export default function DocumentPreview({ params }) {
     <DashboardLayout>
       <div className="container mx-auto px-4 py-6">
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold">Document Preview</h1>
+          <h1 className="text-2xl font-bold text-black">Document Preview</h1>
           <div className="flex space-x-3">
             <button
               onClick={() => router.push('/dashboard/student')}
@@ -1097,12 +1097,7 @@ export default function DocumentPreview({ params }) {
         {/* PDF Preview */}
         <div className="mb-6 border-2 border-gray-200 rounded-lg overflow-hidden" style={{ height: "70vh" }}>
           <div className="h-full w-full">
-            {pdfLoading && (
-              <div className="bg-gray-100 p-4 text-center">
-                <div className="spinner h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-                <p className="mt-2">Loading PDF preview...</p>
-              </div>
-            )}
+            
             <PDFViewer 
               width="100%" 
               height="100%" 

@@ -91,9 +91,9 @@ export default function StudentDashboard() {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {documents.map((doc) => (
                       <tr key={doc._id}>
-                        <td className="px-6 py-4 whitespace-nowrap">{doc.title}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">{doc.clubName}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-6 py-4 whitespace-nowrap text-black">{doc.title}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-black">{doc.clubName}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-black">
                           <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
                             ${doc.status === 'completed' ? 'bg-green-100 text-green-800' : ''}
                             ${doc.status === 'rejected' ? 'bg-red-100 text-red-800' : ''}
@@ -102,7 +102,7 @@ export default function StudentDashboard() {
                             {doc.status.replace('_', ' ').replace('pending', 'awaiting').toUpperCase()}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-6 py-4 whitespace-nowrap text-black">
                           {new Date(doc.createdAt).toLocaleDateString()}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
