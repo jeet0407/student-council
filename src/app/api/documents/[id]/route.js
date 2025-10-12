@@ -14,7 +14,7 @@ export async function GET(req, { params }) {
 
     await dbConnect();
     
-    const { id } = params;
+    const { id } = await params;
     
     // Fetch document by ID
     const document = await Document.findById(id).populate('createdBy', 'name email');
@@ -29,24 +29,29 @@ export async function GET(req, { params }) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // If student head, can only access own documents
-    if (session.user.role === 'student_head' && document.createdBy.toString() !== user._id.toString()) {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
-    }
-
-    // Faculty can only access pending_faculty documents
-    if (session.user.role === 'faculty' && document.status !== 'pending_faculty') {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
-    }
-
-    // Dean SWO can only access pending_dean_swo documents
-    if (session.user.role === 'dean_swo' && document.status !== 'pending_dean_swo') {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
-    }
-
-    // Dean SW can only access pending_dean_sw documents
-    if (session.user.role === 'dean_sw' && document.status !== 'pending_dean_sw') {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    // Authorization based on role
+    if (session.user.role === 'student_head') {
+      // Students can only access their own documents
+      // Handle both populated and non-populated createdBy
+      const createdById = document.createdBy._id || document.createdBy;
+      if (createdById.toString() !== user._id.toString()) {
+        return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+      }
+    } else if (session.user.role === 'faculty') {
+      // Faculty can only access documents in pending_faculty status
+      if (document.status !== 'pending_faculty') {
+        return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+      }
+    } else if (session.user.role === 'dean_swo') {
+      // Dean SWO can only access documents in pending_dean_swo status
+      if (document.status !== 'pending_dean_swo') {
+        return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+      }
+    } else if (session.user.role === 'dean_sw') {
+      // Dean SW can only access documents in pending_dean_sw status
+      if (document.status !== 'pending_dean_sw') {
+        return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+      }
     }
     
     return NextResponse.json(document);
@@ -65,7 +70,7 @@ export async function PUT(req, { params }) {
 
     await dbConnect();
     
-    const { id } = params;
+    const { id } = await params;
     const updateData = await req.json();
     
     // Fetch document by ID
@@ -84,7 +89,9 @@ export async function PUT(req, { params }) {
     // Authorization checks based on document status and user role
     if (session.user.role === 'student_head') {
       // Student head can only update own documents in pending_student_signature status
-      if (document.createdBy.toString() !== user._id.toString() || 
+      // Handle both populated and non-populated createdBy
+      const createdById = document.createdBy._id || document.createdBy;
+      if (createdById.toString() !== user._id.toString() || 
           document.status !== 'pending_student_signature') {
         return NextResponse.json({ error: 'Access denied' }, { status: 403 });
       }
