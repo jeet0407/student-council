@@ -1,3 +1,4 @@
+// Updated Document Preview Page using PDF Format System
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -9,9 +10,11 @@ import SignaturePad from '@/components/SignaturePad';
 import { saveAs } from 'file-saver';
 
 // Import the new PDF format system
-import { getPDFComponent, PDFFormatTypes } from '@/pdfFormat';
-
-
+import PDFFormatManager, { 
+  PDFFormatTypes, 
+  getPDFComponent, 
+  detectPDFFormat 
+} from '@/pdfFormat';
 
 export default function DocumentPreview({ params }) {
   // Use React.use to properly unwrap the params
@@ -29,12 +32,33 @@ export default function DocumentPreview({ params }) {
   const [pdfError, setPdfError] = useState(null);
   const [pdfLoading, setPdfLoading] = useState(true);
   
-  // Layout options for PDF
+  // New PDF format system state
+  const [selectedFormat, setSelectedFormat] = useState(PDFFormatTypes.CLUB_EVENT_VOUCHER);
+  const [availableFormats, setAvailableFormats] = useState([]);
   const [layoutOptions, setLayoutOptions] = useState({
     moveFinancialToPage2: false,
     moveAboutEventToPage2: false,
     moveSignaturesToPage2: false,
   });
+  
+  // Initialize available formats
+  useEffect(() => {
+    const formats = PDFFormatManager.getAvailableFormats();
+    setAvailableFormats(formats);
+  }, []);
+  
+  // Auto-detect format when document loads
+  useEffect(() => {
+    if (document) {
+      try {
+        const detectedFormat = detectPDFFormat(document);
+        setSelectedFormat(detectedFormat);
+      } catch (err) {
+        console.warn('Could not auto-detect format, using default:', err);
+        setSelectedFormat(PDFFormatTypes.CLUB_EVENT_VOUCHER);
+      }
+    }
+  }, [document]);
   
   // Fetch document data
   useEffect(() => {
@@ -91,12 +115,38 @@ export default function DocumentPreview({ params }) {
     }));
   };
 
+  // Handle format change
+  const handleFormatChange = (formatType) => {
+    setSelectedFormat(formatType);
+    
+    // Reset layout options when changing formats
+    setLayoutOptions({
+      moveFinancialToPage2: false,
+      moveAboutEventToPage2: false,
+      moveSignaturesToPage2: false,
+    });
+  };
+
   const handleDownloadPDF = async () => {
     try {
       setPdfError(null);
       
-      // Use CEV format directly
-      const PDFComponent = getPDFComponent(PDFFormatTypes.CLUB_EVENT_VOUCHER);
+      // Validate document for selected format
+      const validation = PDFFormatManager.validateDocumentForFormat(document, selectedFormat);
+      if (!validation.isValid) {
+        setPdfError(`Document validation failed. Missing fields: ${validation.missingFields.join(', ')}`);
+        return;
+      }
+      
+      // Generate PDF using the format system
+      const { component: PDFComponent } = await PDFFormatManager.generatePDF(
+        document, 
+        selectedFormat, 
+        {
+          signature,
+          ...layoutOptions,
+        }
+      );
       
       const asPdf = pdf(
         <PDFComponent 
@@ -106,7 +156,7 @@ export default function DocumentPreview({ params }) {
         />
       );
       const blob = await asPdf.toBlob();
-      saveAs(blob, `document-${documentId}.pdf`);
+      saveAs(blob, `document-${documentId}-${selectedFormat}.pdf`);
     } catch (err) {
       console.error('Error downloading PDF:', err);
       setPdfError(`Failed to download PDF: ${err.message}`);
@@ -121,6 +171,12 @@ export default function DocumentPreview({ params }) {
 
     setIsSubmitting(true);
     try {
+      // Validate document for selected format
+      const validation = PDFFormatManager.validateDocumentForFormat(document, selectedFormat);
+      if (!validation.isValid) {
+        throw new Error(`Document validation failed. Missing fields: ${validation.missingFields.join(', ')}`);
+      }
+      
       // First, upload the signature image
       const signatureFormData = new FormData();
       signatureFormData.append('signature', dataURLtoFile(signature, 'student-signature.png'));
@@ -138,8 +194,15 @@ export default function DocumentPreview({ params }) {
 
       const signatureResult = await signatureResponse.json();
       
-      // Generate PDF document using CEV format
-      const PDFComponent = getPDFComponent(PDFFormatTypes.CLUB_EVENT_VOUCHER);
+      // Generate PDF document using format system
+      const { component: PDFComponent } = await PDFFormatManager.generatePDF(
+        document, 
+        selectedFormat, 
+        {
+          signature,
+          ...layoutOptions,
+        }
+      );
       
       const asPdf = pdf(
         <PDFComponent 
@@ -152,9 +215,10 @@ export default function DocumentPreview({ params }) {
       
       // Create form data for PDF upload
       const pdfFormData = new FormData();
-      pdfFormData.append('pdf', blob, 'document.pdf');
+      pdfFormData.append('pdf', blob, `document-${selectedFormat}.pdf`);
       pdfFormData.append('documentId', documentId);
       pdfFormData.append('version', 'studentSigned');
+      pdfFormData.append('format', selectedFormat);
       
       // Upload PDF
       const pdfResponse = await fetch('/api/documents/pdf', {
@@ -181,6 +245,7 @@ export default function DocumentPreview({ params }) {
           pdfVersions: {
             studentSigned: pdfResult.pdfPath
           },
+          pdfFormat: selectedFormat, // Store the format used
           layoutOptions: layoutOptions, // Store layout preferences
           status: 'pending_faculty',
         }),
@@ -216,10 +281,10 @@ export default function DocumentPreview({ params }) {
     return new File([u8arr], filename, {type: mime});
   };
 
-  // Render PDF using CEV format
+  // Render PDF using current format
   const renderPDF = () => {
     try {
-      const PDFComponent = getPDFComponent(PDFFormatTypes.CLUB_EVENT_VOUCHER);
+      const PDFComponent = getPDFComponent(selectedFormat);
       return (
         <PDFComponent 
           document={document} 
@@ -298,6 +363,32 @@ export default function DocumentPreview({ params }) {
               Download PDF
             </button>
           </div>
+        </div>
+
+        {/* Format Selection */}
+        <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+          <h3 className="text-sm font-medium text-gray-900 mb-2">PDF Format Selection</h3>
+          <div className="flex flex-wrap gap-2">
+            {availableFormats.map((format) => (
+              <button
+                key={format.type}
+                onClick={() => handleFormatChange(format.type)}
+                className={`px-3 py-1 rounded-md text-xs font-medium ${
+                  selectedFormat === format.type
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                }`}
+                title={format.description}
+              >
+                {format.name}
+              </button>
+            ))}
+          </div>
+          {selectedFormat && (
+            <p className="mt-2 text-xs text-gray-600">
+              Current: {availableFormats.find(f => f.type === selectedFormat)?.description}
+            </p>
+          )}
         </div>
 
         {/* PDF Error */}
