@@ -20,7 +20,7 @@ const styles = StyleSheet.create({
   headerImage: {
     width: '100%',
     height: 100, // adjust to your header height
-    objectFit: 'cover',
+    objectFit: 'contain',
   },
 });
 // Document Info Component
