@@ -1,50 +1,28 @@
 // PDF Component Generator for CEV (Club Event Voucher)
 import React from 'react';
-import { Document, Page, Text, View, Image } from '@react-pdf/renderer';
+import { Document, Page, Text, View, Image, StyleSheet } from '@react-pdf/renderer';
 import { CEVStyles, CEVConfig, CEVHelpers } from './generatePdfCEV';
-import { SVNIT_LOGO_BASE64 } from './constants';
+import { HEADER_BASE64 } from './constants';
 
-// Header Component - FIXED VERSION
-export const CEVHeader = ({ document }) => (
-  <View style={CEVStyles.header}>
-    {/* SVNIT Logo */}
-    <View style={{ width: 70, alignItems: 'center', flexShrink: 0 }}>
-      <Image 
-        style={CEVStyles.logo}
-        src={SVNIT_LOGO_BASE64}
-      />
-    </View>
-    
-    {/* Header Text - Institution Names */}
-    <View style={CEVStyles.headerTextContainer}>
-      {/* Hindi Text */}
-      <Text style={CEVStyles.headerTextHindi}>
-        सरदार वल्लभभाई राष्ट्रीय प्रौद्योगिकी संस्थान, सूरत
-      </Text>
-      
-      {/* English Text - Split into two lines for better fit */}
-      <Text style={CEVStyles.headerTextEnglish}>
-        SARDAR VALLABHBHAI NATIONAL INSTITUTE OF
-      </Text>
-      <Text style={[CEVStyles.headerTextEnglish, { marginTop: 0 }]}>
-        TECHNOLOGY, SURAT
-      </Text>
-      
-      {/* Gujarati Text */}
-      <Text style={CEVStyles.headerTextGujarati}>
-        સરદાર વલ્લભભાઈ રાષ્ટ્રીય પ્રૌદ્યોગિકી સંસ્થાન, સુરત
-      </Text>
-    </View>
-    
-    {/* Vertical SVNIT Text - SV, NI, T format */}
-    <View style={CEVStyles.svnitVertical}>
-      <Text style={CEVStyles.svnitGroup}>SV</Text>
-      <Text style={CEVStyles.svnitGroup}>NI</Text>
-      <Text style={CEVStyles.svnitGroup}>T</Text>
-    </View>
+export const CEVHeader = () => (
+  <View style={styles.headerContainer}>
+    <Image
+      src={HEADER_BASE64} // must be valid Base64 string
+      style={styles.headerImage}
+    />
   </View>
 );
 
+const styles = StyleSheet.create({
+  headerContainer: {
+    width: '100%',
+  },
+  headerImage: {
+    width: '100%',
+    height: 100, // adjust to your header height
+    objectFit: 'cover',
+  },
+});
 // Document Info Component
 export const CEVDocumentInfo = ({ document }) => (
   <View style={CEVStyles.documentInfo}>
