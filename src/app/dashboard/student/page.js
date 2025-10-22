@@ -10,6 +10,7 @@ export default function StudentDashboard() {
   const router = useRouter();
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [feedbackModal, setFeedbackModal] = useState({ show: false, feedback: '' });
 
   useEffect(() => {
     // Check authentication
@@ -62,7 +63,7 @@ export default function StudentDashboard() {
           <h1 className="text-2xl font-bold text-black">Student Head Dashboard</h1>
           <button 
             onClick={() => router.push('/dashboard/student/new-document')}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md cursor-pointer"
           >
             Create New Document
           </button>
@@ -95,11 +96,12 @@ export default function StudentDashboard() {
                         <td className="px-6 py-4 whitespace-nowrap text-black">{doc.clubName}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-black">
                           <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                            ${doc.status === 'completed' ? 'bg-green-100 text-green-800' : ''}
+                            ${doc.status === 'passed' ? 'bg-green-100 text-green-800' : ''}
                             ${doc.status === 'rejected' ? 'bg-red-100 text-red-800' : ''}
+                            ${doc.status === 'draft' ? 'bg-gray-100 text-gray-800' : ''}
                             ${doc.status.includes('pending') ? 'bg-yellow-100 text-yellow-800' : ''}
                           `}>
-                            {doc.status.replace('_', ' ').replace('pending', 'awaiting').toUpperCase()}
+                            {doc.status === 'draft' ? 'DRAFT' : doc.status.replace('_', ' ').replace('pending', 'awaiting').toUpperCase()}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-black">
@@ -108,11 +110,19 @@ export default function StudentDashboard() {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <button 
                             onClick={() => router.push(`/dashboard/student/document/${doc._id}`)}
-                            className="text-blue-600 hover:text-blue-900 mr-4"
+                            className="text-blue-600 hover:text-blue-900 mr-4 cursor-pointer"
                           >
                             View
                           </button>
-                          {doc.status === 'completed' && (
+                          {doc.status === 'draft' && (
+                            <button 
+                              onClick={() => router.push(`/dashboard/student/edit-document/${doc._id}`)}
+                              className="text-gray-600 hover:text-gray-900 cursor-pointer"
+                            >
+                              Edit
+                            </button>
+                          )}
+                          {doc.status === 'passed' && (
                             <button 
                               onClick={() => window.open(`/api/documents/${doc._id}/download`, '_blank')}
                               className="text-green-600 hover:text-green-900"
@@ -120,10 +130,13 @@ export default function StudentDashboard() {
                               Download
                             </button>
                           )}
-                          {doc.status === 'rejected' && (
-                            <span className="text-red-600">
-                              {doc.feedback && `Feedback: ${doc.feedback}`}
-                            </span>
+                          {doc.status === 'rejected' && doc.feedback && (
+                            <button 
+                              onClick={() => setFeedbackModal({ show: true, feedback: doc.feedback })}
+                              className="text-red-600 hover:text-red-900 text-sm underline cursor-pointer"
+                            >
+                              View Feedback
+                            </button>
                           )}
                         </td>
                       </tr>
@@ -134,6 +147,36 @@ export default function StudentDashboard() {
             )}
           </div>
         </div>
+
+        {/* Feedback Modal */}
+        {feedbackModal.show && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex justify-between items-start mb-4">
+                  <h3 className="text-xl font-semibold text-red-800">Rejection Feedback</h3>
+                  <button 
+                    onClick={() => setFeedbackModal({ show: false, feedback: '' })}
+                    className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
+                  >
+                    ×
+                  </button>
+                </div>
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <p className="text-gray-800 whitespace-pre-wrap">{feedbackModal.feedback}</p>
+                </div>
+                <div className="mt-6 flex justify-end">
+                  <button
+                    onClick={() => setFeedbackModal({ show: false, feedback: '' })}
+                    className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </DashboardLayout>
   );

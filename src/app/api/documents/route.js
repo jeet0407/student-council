@@ -5,6 +5,35 @@ import dbConnect from '@/lib/mongoose';
 import Document from '@/models/Document';
 import User from '@/models/User';
 
+export async function GET(req) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    await dbConnect();
+
+    // Fetch all documents with populated fields
+    const documents = await Document.find()
+      .populate('createdBy', 'name email')
+      .populate({
+        path: 'approvalHistory',
+        populate: {
+          path: 'approvedBy',
+          select: 'name email role'
+        }
+      })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return NextResponse.json(documents);
+  } catch (error) {
+    console.error('Error fetching documents:', error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
 export async function POST(req) {
   try {
     const session = await getServerSession(authOptions);
@@ -82,21 +111,8 @@ export async function POST(req) {
       financialProposal: formData.financialProposal || [{ item: '', amount: 0 }],
       
       // Other document metadata
-      status: 'pending_student_signature',
+      status: 'draft', // Start as draft
       createdBy: user._id,
-      pdfVersions: {
-        base: null,
-        studentSigned: null,
-        facultySigned: null,
-        deanSWOSigned: null,
-        final: null,
-      },
-      signatures: {
-        student: null,
-        faculty: null,
-        deanSWO: null,
-        deanSW: null,
-      },
     });
     
     await newDocument.save();
