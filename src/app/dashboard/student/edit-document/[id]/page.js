@@ -68,12 +68,6 @@ export default function EditDocument({ params }) {
   // Form validation errors
   const [errors, setErrors] = useState({});
 
-  useEffect(() => {
-    if (status === 'authenticated' && documentId) {
-      fetchDocument();
-    }
-  }, [status, documentId]);
-
   const fetchDocument = async () => {
     try {
       const response = await fetch(`/api/documents/${documentId}`);
@@ -144,6 +138,13 @@ export default function EditDocument({ params }) {
       router.push('/dashboard/student');
     }
   };
+
+  useEffect(() => {
+    if (status === 'authenticated' && documentId) {
+      fetchDocument();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status, documentId]);
   
   // Handle input change
   const handleChange = (e) => {
