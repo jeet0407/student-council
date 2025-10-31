@@ -42,8 +42,8 @@ export default function Page() {
 
                     <div className="absolute inset-0 bg-black/45 z-[1]" />
 
-                    <div className="relative text-center z-[2] text-black px-4 sm:px-6">
-                        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl mb-4 md:mb-6 font-bold">
+                    <div className="relative text-center z-[2] px-4 sm:px-6 text-black">
+                        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl mb-4 md:mb-6 font-bold text-black drop-shadow-lg">
                             Welcome to SVNIT SAMPARK
                         </h1>
 
