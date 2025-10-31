@@ -15,6 +15,11 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "SAMPARK - SVNIT",
   description: "Sampark Portal for SVNIT Students and Faculty",
+  icons: {
+    icon: '/logo-svnit.ico',
+    shortcut: '/logo-svnit.ico',
+    apple: '/logo-svnit.png',
+  },
 };
 
 export default function RootLayout({ children }) {
