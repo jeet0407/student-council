@@ -22,7 +22,7 @@ export async function GET(req) {
 
     // Fetch only essential fields for listing
     const documents = await Document.find({ createdBy: user._id })
-      .select('title clubName status createdAt eventDate documentNumber approvalHistory')
+      .select('title clubName status createdAt eventDate documentNumber approvalHistory feedback')
       .sort({ createdAt: -1 }) // Most recent first
       .lean();
     
