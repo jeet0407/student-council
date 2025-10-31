@@ -265,11 +265,11 @@ export const SEVConfig = {
       columns: [
         { key: 'item', label: 'Item/Service', width: '50%' },
         { key: 'quantity', label: 'Quantity', width: '15%' },
-        { key: 'unitCost', label: 'Unit Cost (₹)', width: '15%', align: 'right' },
-        { key: 'totalCost', label: 'Total Cost (₹)', width: '20%', align: 'right' },
+        { key: 'unitCost', label: 'Unit Cost ()', width: '15%', align: 'right' },
+        { key: 'totalCost', label: 'Total Cost ()', width: '20%', align: 'right' },
       ],
       showTotal: true,
-      currency: '₹',
+      currency: '',
     },
     
     officeUse: {
@@ -277,7 +277,7 @@ export const SEVConfig = {
       fields: [
         { key: 'groundAllocation', label: 'Ground/Facility Allocated', width: '50%' },
         { key: 'equipmentApproved', label: 'Equipment Approved', width: '50%' },
-        { key: 'budgetApproved', label: 'Budget Approved (₹)', width: '50%' },
+        { key: 'budgetApproved', label: 'Budget Approved ()', width: '50%' },
         { key: 'conditions', label: 'Special Conditions/Instructions', width: '50%' },
         { key: 'sportsOfficerRemarks', label: 'Sports Officer Remarks', width: '50%' },
       ],
@@ -367,7 +367,7 @@ export const SEVHelpers = {
     }, 0).toFixed(2);
   },
   
-  formatCurrency: (amount, currency = '₹') => {
+  formatCurrency: (amount, currency = '') => {
     return `${currency}${Number(amount || 0).toFixed(2)}`;
   },
   

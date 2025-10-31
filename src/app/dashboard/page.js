@@ -37,7 +37,7 @@ export default function Dashboard() {
 
   if (status === 'loading') {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen text-black">
         <div className="text-center">
           <div className="spinner"></div>
           <p className="mt-2">Loading...</p>

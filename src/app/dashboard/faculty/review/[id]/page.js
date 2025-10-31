@@ -4,8 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import DashboardLayout from '@/components/DashboardLayout';
-import { PDFViewer } from '@react-pdf/renderer';
+import { PDFViewer, pdf } from '@react-pdf/renderer';
 import { getPDFComponent, PDFFormatTypes } from '@/pdfFormat';
+import { saveAs } from 'file-saver';
 
 export default function FacultyReviewPage({ params }) {
   const documentId = React.use(params).id;
@@ -18,6 +19,7 @@ export default function FacultyReviewPage({ params }) {
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [feedback, setFeedback] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     if (status === 'authenticated' && documentId) {
@@ -25,6 +27,18 @@ export default function FacultyReviewPage({ params }) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, documentId]);
+
+  useEffect(() => {
+    // Check if mobile device
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const fetchDocument = async () => {
     try {
@@ -98,10 +112,21 @@ export default function FacultyReviewPage({ params }) {
     }
   };
 
+  const handleDownloadPDF = async () => {
+    try {
+      const PDFComponent = getPDFComponent(PDFFormatTypes.CLUB_EVENT_VOUCHER);
+      const blob = await pdf(<PDFComponent document={document} />).toBlob();
+      saveAs(blob, `${document.title}_${document.documentNumber}.pdf`);
+    } catch (err) {
+      console.error('Error downloading PDF:', err);
+      alert('Failed to download PDF. Please try again.');
+    }
+  };
+
   if (status === 'loading' || loading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center h-64">
+        <div className="flex items-center justify-center h-64 text-black">
           <div className="text-center">
             <div className="spinner"></div>
             <p className="mt-2">Loading...</p>
@@ -164,11 +189,66 @@ export default function FacultyReviewPage({ params }) {
         {/* PDF Preview */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
           <h3 className="text-lg font-semibold mb-4 text-black">Document Preview</h3>
-          <div className="border rounded" style={{ height: '600px' }}>
-            <PDFViewer width="100%" height="100%">
-              <PDFComponent document={document} />
-            </PDFViewer>
-          </div>
+          {isMobile ? (
+            <div className="text-center py-8">
+              <div className="mb-4">
+                <svg
+                  className="mx-auto h-16 w-16 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                  />
+                </svg>
+              </div>
+              <p className="text-gray-600 mb-4">PDF preview is not available on mobile devices</p>
+              <button
+                onClick={handleDownloadPDF}
+                className="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
+              >
+                <svg
+                  className="w-5 h-5 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                  />
+                </svg>
+                Download PDF Document
+              </button>
+              <div className="mt-6 text-left bg-gray-50 rounded-lg p-4">
+                <h4 className="font-semibold text-gray-900 mb-2">Document Summary</h4>
+                <div className="space-y-2 text-sm text-gray-700">
+                  <div>
+                    <span className="font-medium">Event:</span> {document.title}
+                  </div>
+                  <div>
+                    <span className="font-medium">Date:</span> {document.eventDate}
+                  </div>
+                  <div>
+                    <span className="font-medium">Total Budget:</span> ₹
+                    {document.financialProposal?.reduce((sum, item) => sum + (item.amount || 0), 0).toLocaleString()}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="border rounded" style={{ height: '600px' }}>
+              <PDFViewer width="100%" height="100%">
+                <PDFComponent document={document} />
+              </PDFViewer>
+            </div>
+          )}
         </div>
 
         {/* Action Buttons */}

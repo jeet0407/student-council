@@ -14,17 +14,11 @@ export async function GET(req) {
 
     await dbConnect();
 
-    // Fetch all documents with populated fields
+    // Fetch only essential fields for listing
     const documents = await Document.find()
-      .populate('createdBy', 'name email')
-      .populate({
-        path: 'approvalHistory',
-        populate: {
-          path: 'approvedBy',
-          select: 'name email role'
-        }
-      })
+      .select('title clubName status createdAt eventDate approvalHistory')
       .sort({ createdAt: -1 })
+      .limit(100) // Limit to recent 100 documents
       .lean();
 
     return NextResponse.json(documents);

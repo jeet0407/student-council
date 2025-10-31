@@ -4,8 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import DashboardLayout from '@/components/DashboardLayout';
-import { PDFViewer } from '@react-pdf/renderer';
+import { PDFViewer, pdf } from '@react-pdf/renderer';
 import { getPDFComponent, PDFFormatTypes } from '@/pdfFormat';
+import { saveAs } from 'file-saver';
 
 export default function DeanSWReviewPage({ params }) {
   const documentId = React.use(params).id;
@@ -18,6 +19,7 @@ export default function DeanSWReviewPage({ params }) {
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [feedback, setFeedback] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     if (status === 'authenticated' && documentId) {
@@ -25,6 +27,18 @@ export default function DeanSWReviewPage({ params }) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, documentId]);
+
+  useEffect(() => {
+    // Check if mobile device
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const fetchDocument = async () => {
     try {
@@ -98,10 +112,21 @@ export default function DeanSWReviewPage({ params }) {
     }
   };
 
+  const handleDownloadPDF = async () => {
+    try {
+      const PDFComponent = getPDFComponent(PDFFormatTypes.CLUB_EVENT_VOUCHER);
+      const blob = await pdf(<PDFComponent document={document} />).toBlob();
+      saveAs(blob, `${document.title}_${document.documentNumber}.pdf`);
+    } catch (err) {
+      console.error('Error downloading PDF:', err);
+      alert('Failed to download PDF. Please try again.');
+    }
+  };
+
   if (status === 'loading' || loading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center h-64">
+        <div className="flex items-center justify-center h-64 text-black">
           <div className="text-center">
             <div className="spinner h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
             <p className="mt-2">Loading document...</p>
@@ -127,27 +152,27 @@ export default function DeanSWReviewPage({ params }) {
 
   return (
     <DashboardLayout>
-      <div className="container mx-auto px-4 py-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl text-black font-bold">Review Document - Final Approval</h1>
+      <div className="container mx-auto px-3 sm:px-4 md:px-6 py-4 md:py-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-4 md:mb-6">
+          <h1 className="text-lg sm:text-xl md:text-2xl text-black font-bold">Review Document - Final Approval</h1>
           <button
             onClick={() => router.push('/dashboard/dean-sw')}
-            className="text-gray-600 hover:text-gray-800 cursor-pointer"
+            className="text-sm sm:text-base text-gray-600 hover:text-gray-800 cursor-pointer"
           >
             ← Back to Dashboard
           </button>
         </div>
 
         {/* Document Info */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6 text-black">
-          <h2 className="text-xl font-semibold mb-4">{document.title}</h2>
-          <div className="grid grid-cols-2 gap-4 text-sm">
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6 mb-4 md:mb-6 text-black">
+          <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">{document.title}</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
             <div>
               <span className="font-medium">Club:</span> {document.clubName}
             </div>
             <div>
               <span className="font-medium">Status:</span>{' '}
-              <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded">
+              <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs sm:text-sm">
                 {document.status.replace('_', ' ').toUpperCase()}
               </span>
             </div>
@@ -162,12 +187,12 @@ export default function DeanSWReviewPage({ params }) {
           
           {/* Show approval history */}
           {document.approvalHistory && document.approvalHistory.length > 0 && (
-            <div className="mt-4 pt-4 border-t">
-              <h3 className="font-semibold text-gray-800 mb-2">Previous Approvals:</h3>
+            <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t">
+              <h3 className="font-semibold text-gray-800 mb-2 text-sm sm:text-base">Previous Approvals:</h3>
               <div className="space-y-2">
                 {document.approvalHistory.map((history, index) => (
-                  <div key={index} className="text-sm flex items-center gap-2">
-                    <span className="px-2 py-1 rounded text-xs font-semibold bg-green-100 text-green-800">
+                  <div key={index} className="text-xs sm:text-sm flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                    <span className="px-2 py-1 rounded text-xs font-semibold bg-green-100 text-green-800 w-fit">
                       ✓ {history.role.toUpperCase().replace('_', ' ')}
                     </span>
                     <span className="text-gray-600">{new Date(history.approvedAt).toLocaleDateString()}</span>
@@ -179,43 +204,98 @@ export default function DeanSWReviewPage({ params }) {
         </div>
 
         {/* PDF Preview */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h3 className="text-lg font-semibold mb-4 text-black">Document Preview</h3>
-          <div className="border rounded" style={{ height: '600px' }}>
-            <PDFViewer width="100%" height="100%">
-              <PDFComponent document={document} />
-            </PDFViewer>
-          </div>
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6 mb-4 md:mb-6">
+          <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-black">Document Preview</h3>
+          {isMobile ? (
+            <div className="text-center py-8">
+              <div className="mb-4">
+                <svg
+                  className="mx-auto h-16 w-16 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                  />
+                </svg>
+              </div>
+              <p className="text-gray-600 mb-4">PDF preview is not available on mobile devices</p>
+              <button
+                onClick={handleDownloadPDF}
+                className="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
+              >
+                <svg
+                  className="w-5 h-5 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                  />
+                </svg>
+                Download PDF Document
+              </button>
+              <div className="mt-6 text-left bg-gray-50 rounded-lg p-4">
+                <h4 className="font-semibold text-gray-900 mb-2">Document Summary</h4>
+                <div className="space-y-2 text-sm text-gray-700">
+                  <div>
+                    <span className="font-medium">Event:</span> {document.title}
+                  </div>
+                  <div>
+                    <span className="font-medium">Date:</span> {document.eventDate}
+                  </div>
+                  <div>
+                    <span className="font-medium">Total Budget:</span> ₹
+                    {document.financialProposal?.reduce((sum, item) => sum + (item.amount || 0), 0).toLocaleString()}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="border rounded" style={{ height: '500px', maxHeight: '70vh' }}>
+              <PDFViewer width="100%" height="100%">
+                <PDFComponent document={document} />
+              </PDFViewer>
+            </div>
+          )}
         </div>
 
         {/* Action Buttons */}
         {document.status === 'pending_dean_sw' ? (
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="bg-blue-50 border border-blue-200 rounded p-4 mb-4">
-              <p className="text-blue-800 text-sm">
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+            <div className="bg-blue-50 border border-blue-200 rounded p-3 sm:p-4 mb-3 sm:mb-4">
+              <p className="text-blue-800 text-xs sm:text-sm">
                 <strong>Final Approval:</strong> Accepting this document will mark it as PASSED and complete the approval process.
               </p>
             </div>
-            <div className="flex gap-4 justify-end">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-end">
               <button
                 onClick={() => setShowRejectModal(true)}
                 disabled={submitting}
-                className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md disabled:opacity-50"
+                className="w-full sm:w-auto px-6 py-2.5 sm:py-2 bg-red-600 hover:bg-red-700 text-white rounded-md disabled:opacity-50 transition-colors"
               >
                 Reject
               </button>
               <button
                 onClick={handleAccept}
                 disabled={submitting}
-                className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md disabled:opacity-50"
+                className="w-full sm:w-auto px-6 py-2.5 sm:py-2 bg-green-600 hover:bg-green-700 text-white rounded-md disabled:opacity-50 transition-colors"
               >
                 Accept (Final Approval)
               </button>
             </div>
           </div>
         ) : (
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="bg-gray-50 border border-gray-200 rounded p-4">
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+            <div className="bg-gray-50 border border-gray-200 rounded p-3 sm:p-4">
               <p className="text-gray-700 text-sm">
                 This document has already been processed. You can view it but cannot make changes.
               </p>
@@ -225,34 +305,34 @@ export default function DeanSWReviewPage({ params }) {
 
         {/* Reject Modal */}
         {showRejectModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 max-w-md w-full">
-              <h3 className="text-lg font-semibold mb-4 text-black">Reject Document</h3>
-              <p className="text-sm text-gray-600 mb-4">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg p-4 sm:p-6 max-w-md w-full">
+              <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-black">Reject Document</h3>
+              <p className="text-sm text-gray-600 mb-3 sm:mb-4">
                 Please provide feedback for the rejection:
               </p>
               <textarea
                 value={feedback}
                 onChange={(e) => setFeedback(e.target.value)}
-                className="w-full border border-gray-300 rounded-md p-2 mb-4 text-black"
+                className="w-full border border-gray-300 rounded-md p-2 mb-3 sm:mb-4 text-black text-sm"
                 rows="4"
                 placeholder="Enter your feedback here..."
               />
-              <div className="flex gap-4 justify-end">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-end">
                 <button
                   onClick={() => {
                     setShowRejectModal(false);
                     setFeedback('');
                   }}
                   disabled={submitting}
-                  className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-md disabled:opacity-50"
+                  className="w-full sm:w-auto px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-md disabled:opacity-50 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleReject}
                   disabled={submitting || !feedback.trim()}
-                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md disabled:opacity-50"
+                  className="w-full sm:w-auto px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md disabled:opacity-50 transition-colors"
                 >
                   Submit Rejection
                 </button>

@@ -70,7 +70,7 @@ export default function Login() {
           />
         </div>
         <h1 className="text-2xl font-bold text-center mb-6 text-black">
-          College Activities Documentation System
+          SAMPARK
         </h1>
         
         {error && (

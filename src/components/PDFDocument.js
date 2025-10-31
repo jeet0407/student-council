@@ -492,7 +492,7 @@ const FinancialProposalTable = ({ document }) => {
               <Text style={styles.tableCellText}>Item / Description</Text>
             </View>
             <View style={[styles.financialColAmount, { backgroundColor: '#f0f0f0' }]}>
-              <Text style={styles.tableCellText}>Amount (₹)</Text>
+              <Text style={styles.tableCellText}>Amount</Text>
             </View>
           </View>
           <View style={styles.tableRow}>
@@ -517,7 +517,7 @@ const FinancialProposalTable = ({ document }) => {
             <Text style={styles.tableCellText}>Item / Description</Text>
           </View>
           <View style={[styles.financialColAmount, { backgroundColor: '#f0f0f0' }]}>
-            <Text style={styles.tableCellText}>Amount (₹)</Text>
+            <Text style={styles.tableCellText}>Amount</Text>
           </View>
         </View>
         
@@ -527,7 +527,7 @@ const FinancialProposalTable = ({ document }) => {
               <Text style={styles.tableCellValue}>{row.item}</Text>
             </View>
             <View style={styles.financialColAmount}>
-              <Text style={styles.tableCellValue}>₹{Number(row.amount).toFixed(2)}</Text>
+              <Text style={styles.tableCellValue}>{Number(row.amount).toFixed(2)}</Text>
             </View>
           </View>
         ))}
@@ -537,7 +537,7 @@ const FinancialProposalTable = ({ document }) => {
             <Text style={styles.tableCellText}>Total:</Text>
           </View>
           <View style={styles.financialColAmount}>
-            <Text style={styles.tableCellText}>₹{computeTotal()}</Text>
+            <Text style={styles.tableCellText}>{computeTotal()}</Text>
           </View>
         </View>
       </View>
@@ -683,7 +683,7 @@ const AdministrativeSignatures = () => (
     <View style={styles.adminSignatureBlock}>
       <Text style={styles.adminSignatureTitle}>Recommended/Not Recommended</Text>
       <View style={styles.adminSignatureBox}></View>
-      <Text style={styles.adminName}>Dr. Shweta N. Shah</Text>
+      <Text style={styles.adminName}>Dr. Manish Rathod</Text>
       <Text style={styles.adminDesignation}>Associate Dean (SW)</Text>
     </View>
     

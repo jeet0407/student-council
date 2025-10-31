@@ -182,4 +182,9 @@ const DocumentSchema = new mongoose.Schema({
   },
 });
 
+// Add indexes for better query performance
+DocumentSchema.index({ status: 1, createdAt: -1 });
+DocumentSchema.index({ createdBy: 1, createdAt: -1 });
+DocumentSchema.index({ status: 1, eventDate: 1 });
+
 export default mongoose.models.Document || mongoose.model('Document', DocumentSchema);
