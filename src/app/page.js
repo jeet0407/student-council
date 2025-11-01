@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
@@ -10,6 +10,28 @@ import { useRouter } from "next/navigation";
 export default function Page() {
     const { data: session, status } = useSession();
     const router = useRouter();
+    const [showNavbar, setShowNavbar] = useState(true);
+    const [lastScrollY, setLastScrollY] = useState(0);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            const currentScrollY = window.scrollY;
+            
+            // Show navbar when scrolling up or at the top
+            if (currentScrollY < lastScrollY || currentScrollY < 100) {
+                setShowNavbar(true);
+            } else {
+                // Hide navbar when scrolling down
+                setShowNavbar(false);
+            }
+            
+            setLastScrollY(currentScrollY);
+        };
+
+        window.addEventListener("scroll", handleScroll, { passive: true });
+        
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, [lastScrollY]);
 
     function handleGetStarted(e) {
         e.preventDefault();
@@ -26,31 +48,58 @@ export default function Page() {
         <div className="bg-white min-h-screen">
             <main>
                 <section className="h-screen flex items-center justify-center relative overflow-hidden">
-                    {/* Navbar overlay */}
-                    <div className="absolute top-0 left-0 right-0 z-10 bg-gradient-to-b from-black/30 to-transparent">
-                        <div className="text-white">
-                            <Navbar />
-                        </div>
-                    </div>
+                    {/* Background Video */}
+                    <video
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        preload="auto"
+                        webkit-playsinline="true"
+                        x5-playsinline="true"
+                        className="absolute inset-0 w-full h-full object-cover z-0"
+                        poster="/hero.png"
+                        onLoadedMetadata={(e) => {
+                            e.target.play().catch(error => {
+                                console.log("Video autoplay failed:", error);
+                            });
+                        }}
+                    >
+                        <source src="/s-c.mp4" type="video/mp4" />
+                        Your browser does not support the video tag.
+                    </video>
+                    
+                    {/* Fallback image for when video fails */}
                     <Image
                         src="/hero.png"
                         alt="Hero background"
                         fill
-                        className="object-cover object-center"
+                        className="object-cover object-center -z-10"
                         priority
                     />
 
-                    <div className="absolute inset-0 bg-black/45 z-[1]" />
+                    {/* Navbar - Fixed with scroll detection */}
+                    <div 
+                        className={`fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm shadow-md transition-transform duration-300 ${
+                            showNavbar ? 'translate-y-0' : '-translate-y-full'
+                        }`}
+                    >
+                        <Navbar />
+                    </div>
 
-                    <div className="relative text-center z-[2] px-4 sm:px-6 text-black">
-                        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl mb-4 md:mb-6 font-bold text-black drop-shadow-lg">
+                    {/* Dark Overlay */}
+                    <div className="absolute inset-0 bg-black/50 z-[1]" />
+
+                    {/* Content */}
+                    <div className="relative text-center z-[2] px-4 sm:px-6 flex flex-col items-center justify-center">
+                        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl mb-4 md:mb-6 font-bold text-white drop-shadow-2xl">
                             Welcome to SVNIT SAMPARK
                         </h1>
 
                         <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
                             <button
                                 onClick={handleGetStarted}
-                                className="w-full sm:w-auto py-3 px-8 bg-blue-600 text-white border-none rounded-md cursor-pointer hover:bg-blue-700 transition-colors text-base sm:text-lg font-medium"
+                                className="w-full sm:w-auto py-3 px-8 bg-blue-600 text-white border-none rounded-md cursor-pointer hover:bg-blue-700 transition-colors text-base sm:text-lg font-medium shadow-lg hover:shadow-xl"
                             >
                                 Get Started
                             </button>
