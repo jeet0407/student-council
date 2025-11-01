@@ -45,12 +45,14 @@ export default function DashboardLayout({ children }) {
           { name: 'Dashboard', href: dashboardPath },
           { name: 'Upcoming Event', href: '/dashboard/dean-swo/upcoming-event' },
           { name: 'Announcements', href: '/dashboard/dean-swo/announcements' },
+          { name: 'Clubs', href: '/dashboard/dean-swo/clubs' },
         ];
       case 'dean_sw':
         return [
           { name: 'Dashboard', href: dashboardPath },
           { name: 'Upcoming Event', href: '/dashboard/dean-sw/upcoming-event' },
           { name: 'Announcements', href: '/dashboard/dean-sw/announcements' },
+          { name: 'Clubs', href: '/dashboard/dean-sw/clubs' },
         ];
       default:
         return [{ name: 'Dashboard', href: '/dashboard' }];
