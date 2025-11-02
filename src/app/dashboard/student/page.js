@@ -60,7 +60,7 @@ export default function StudentDashboard() {
     <DashboardLayout>
       <div className="container mx-auto px-3 sm:px-4 md:px-6 py-4 md:py-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-4 md:mb-6">
-          <h1 className="text-xl sm:text-2xl font-bold text-black">Student Head Dashboard</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-black">Student Head Dashboard - CEV</h1>
           <button 
             onClick={() => router.push('/dashboard/student/new-document')}
             className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md cursor-pointer text-sm sm:text-base"

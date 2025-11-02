@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -77,34 +77,6 @@ export default function ClubDetailsPage() {
     const params = useParams();
     const clubId = params.id;
     const club = clubsData[clubId] || clubsData[1];
-
-    // State for editable budgets
-    const [sponsorshipBudget, setSponsorshipBudget] = useState(club.sponsorshipBudget);
-    const [currentBudget, setCurrentBudget] = useState(club.currentBudget);
-    const [isEditingSponsorshipBudget, setIsEditingSponsorshipBudget] = useState(false);
-    const [isEditingCurrentBudget, setIsEditingCurrentBudget] = useState(false);
-    const [tempSponsorshipBudget, setTempSponsorshipBudget] = useState(sponsorshipBudget);
-    const [tempCurrentBudget, setTempCurrentBudget] = useState(currentBudget);
-
-    const handleSaveSponsorshipBudget = () => {
-        setSponsorshipBudget(tempSponsorshipBudget);
-        setIsEditingSponsorshipBudget(false);
-    };
-
-    const handleCancelSponsorshipBudget = () => {
-        setTempSponsorshipBudget(sponsorshipBudget);
-        setIsEditingSponsorshipBudget(false);
-    };
-
-    const handleSaveCurrentBudget = () => {
-        setCurrentBudget(tempCurrentBudget);
-        setIsEditingCurrentBudget(false);
-    };
-
-    const handleCancelCurrentBudget = () => {
-        setTempCurrentBudget(currentBudget);
-        setIsEditingCurrentBudget(false);
-    };
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -208,66 +180,18 @@ export default function ClubDetailsPage() {
                         </div>
 
                         {/* Sponsorship Budget */}
-                        <div className="bg-white rounded-lg shadow-md p-6 text-black">
-                            <div className="flex items-center justify-between mb-2">
-                                <p className="text-sm text-gray-600">
-                                    Sponsorship Budget
-                                </p>
-                                {!isEditingSponsorshipBudget && (
-                                    <button
-                                        onClick={() => setIsEditingSponsorshipBudget(true)}
-                                        className="text-blue-600 hover:text-blue-800 transition-colors"
-                                        title="Edit Sponsorship Budget"
-                                    >
-                                        <svg
-                                            className="h-5 w-5"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke="currentColor"
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                            />
-                                        </svg>
-                                    </button>
-                                )}
-                            </div>
+                        <div className="bg-white rounded-lg shadow-md p-6">
                             <div className="flex items-center justify-between">
-                                <div className="flex-1">
-                                    {isEditingSponsorshipBudget ? (
-                                        <div className="space-y-2">
-                                            <input
-                                                type="number"
-                                                value={tempSponsorshipBudget}
-                                                onChange={(e) => setTempSponsorshipBudget(Number(e.target.value))}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                placeholder="Enter amount"
-                                            />
-                                            <div className="flex gap-2">
-                                                <button
-                                                    onClick={handleSaveSponsorshipBudget}
-                                                    className="px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm"
-                                                >
-                                                    Save
-                                                </button>
-                                                <button
-                                                    onClick={handleCancelSponsorshipBudget}
-                                                    className="px-3 py-1 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors text-sm"
-                                                >
-                                                    Cancel
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <p className="text-2xl font-bold text-green-600">
-                                            ₹{sponsorshipBudget.toLocaleString()}
-                                        </p>
-                                    )}
+                                <div>
+                                    <p className="text-sm text-gray-600 mb-1">
+                                        Sponsorship Budget
+                                    </p>
+                                    <p className="text-2xl font-bold text-green-600">
+                                        ₹
+                                        {club.sponsorshipBudget.toLocaleString()}
+                                    </p>
                                 </div>
-                                <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center ml-4">
+                                <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
                                     <svg
                                         className="h-6 w-6 text-green-600"
                                         fill="none"
@@ -286,66 +210,17 @@ export default function ClubDetailsPage() {
                         </div>
 
                         {/* Current Budget */}
-                        <div className="bg-white rounded-lg shadow-md p-6 text-black">
-                            <div className="flex items-center justify-between mb-2">
-                                <p className="text-sm text-gray-600">
-                                    Current Budget
-                                </p>
-                                {!isEditingCurrentBudget && (
-                                    <button
-                                        onClick={() => setIsEditingCurrentBudget(true)}
-                                        className="text-blue-600 hover:text-blue-800 transition-colors"
-                                        title="Edit Current Budget"
-                                    >
-                                        <svg
-                                            className="h-5 w-5"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke="currentColor"
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                            />
-                                        </svg>
-                                    </button>
-                                )}
-                            </div>
+                        <div className="bg-white rounded-lg shadow-md p-6">
                             <div className="flex items-center justify-between">
-                                <div className="flex-1">
-                                    {isEditingCurrentBudget ? (
-                                        <div className="space-y-2">
-                                            <input
-                                                type="number"
-                                                value={tempCurrentBudget}
-                                                onChange={(e) => setTempCurrentBudget(Number(e.target.value))}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                placeholder="Enter amount"
-                                            />
-                                            <div className="flex gap-2">
-                                                <button
-                                                    onClick={handleSaveCurrentBudget}
-                                                    className="px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm"
-                                                >
-                                                    Save
-                                                </button>
-                                                <button
-                                                    onClick={handleCancelCurrentBudget}
-                                                    className="px-3 py-1 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors text-sm"
-                                                >
-                                                    Cancel
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <p className="text-2xl font-bold text-purple-600">
-                                            ₹{currentBudget.toLocaleString()}
-                                        </p>
-                                    )}
+                                <div>
+                                    <p className="text-sm text-gray-600 mb-1">
+                                        Current Budget
+                                    </p>
+                                    <p className="text-2xl font-bold text-purple-600">
+                                        ₹{club.currentBudget.toLocaleString()}
+                                    </p>
                                 </div>
-                                <div className="h-12 w-12 rounded-full bg-purple-100 flex items-center justify-center ml-4">
+                                <div className="h-12 w-12 rounded-full bg-purple-100 flex items-center justify-center">
                                     <svg
                                         className="h-6 w-6 text-purple-600"
                                         fill="none"

@@ -11,33 +11,14 @@ const clubs = [
         name: "CEV",
         image: "/clubs/cev.png",
     },
-    {
-        id: 2,
-        name: "ACM",
-        image: "/clubs/acm.png",
-    },
-    {
-        id: 3,
-        name: "Drishti",
-        image: "/clubs/drishti.png",
-    },
-    {
-        id: 4,
-        name: "CHRD",
-        image: "/clubs/chrd.png",
-    },
-    {
-        id: 5,
-        name: "GDGC",
-        image: "/clubs/gdgc.png",
-    },
+    
 ];
 
 function ClubCard({ club }) {
     const [imageError, setImageError] = useState(false);
 
     return (
-        <Link href={`/dashboard/dean-sw/clubs/${club.id}`}>
+        <Link href={`/dashboard/dean-swo/clubs/${club.id}`}>
             <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 border border-gray-200 cursor-pointer">
             {/* Club Image */}
             <div className="relative h-48 w-full bg-gray-100">
@@ -76,10 +57,10 @@ export default function ClubsPage() {
                 {/* Header */}
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-900">
-                        Student Clubs
+                        CEV Club
                     </h1>
                     <p className="mt-2 text-sm text-gray-700">
-                        Overview of all active student clubs and organizations
+                        Overview of your student club
                     </p>
                 </div>
 
