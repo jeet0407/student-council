@@ -7,10 +7,11 @@ import DashboardLayout from "@/components/DashboardLayout";
 
 const clubs = [
     {
-        id: 1,
+        id: "690a4eef70ec9e94a3bf5f10", // MongoDB ObjectId from seeded data
         name: "CEV",
         image: "/clubs/cev.png",
     },
+    // Uncomment and add more clubs after seeding them
     {
         id: 2,
         name: "ACM",

@@ -7,7 +7,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 
 const clubs = [
     {
-        id: 1,
+        id: "690a4eef70ec9e94a3bf5f10", // MongoDB ObjectId from seeded data
         name: "CEV",
         image: "/clubs/cev.png",
     },
@@ -18,7 +18,7 @@ function ClubCard({ club }) {
     const [imageError, setImageError] = useState(false);
 
     return (
-        <Link href={`/dashboard/dean-swo/clubs/${club.id}`}>
+        <Link href={`/dashboard/student/clubs/${club.id}`}>
             <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 border border-gray-200 cursor-pointer">
             {/* Club Image */}
             <div className="relative h-48 w-full bg-gray-100">

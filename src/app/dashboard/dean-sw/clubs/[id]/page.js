@@ -1,110 +1,241 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 
-// Static club data
-const clubsData = {
-    1: {
-        name: "CEV NIT Surat",
-        logo: "/clubs/cev.png",
-        chairperson: "Purv Kabaria",
-        coChairperson: "Vanishka",
-        email: "cev@nitsurat.ac.in",
-        allottedBudget: 60000,
-        sponsorshipBudget: 0,
-        currentBudget: 50000,
-    },
-
-};
-
-const budgetHistory = [
-    {
-        date: "2024-01-15",
-        description: "Initial Allocation",
-        amount: 60000,
-        balance: 60000,
-    },
-    {
-        date: "2024-02-20",
-        description: "StrategiX",
-        amount: -10000,
-        balance: 50000,
-    },
-];
-
-const upcomingEvents = [
-    { name: "Paradox", date: "2025-11-9" },
-    { name: "FinFiesta", date: "2026-2-11" },
-    { name: "Data Science Bootcamp", date: "2025-10-5" },
-];
-
-const pastEvents = [
-    { name: "StrategiX", date: "2025-07-30" },
-];
-
-const coreCommittee = [
-    {
-        name: "Purv Kabaria",
-        role: "Chairperson",
-        email: "purv.dev@gmail.com",
-        avatar: "/avatars/avatar1.png",
-    },
-    {
-        name: "Vanishka",
-        role: "Co-Chairperson",
-        email: "vanishka@gmail.com",
-        avatar: "/avatars/avatar2.png",
-    },
-    {
-        name: "Vasu Sadariya",
-        role: "Tresurer",
-        email: "sadariyavasu5@gmail.com",
-        avatar: "/avatars/avatar3.png",
-    },
-    {
-        name: "Avishkar Jha",
-        role: "Secretary",
-        email: "avishkar.jha@gmail.com",
-        avatar: "/avatars/avatar4.png",
-    },
-];
-
 export default function ClubDetailsPage() {
     const params = useParams();
     const clubId = params.id;
-    const club = clubsData[clubId] || clubsData[1];
+
+    // State for club data
+    const [club, setClub] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     // State for editable budgets
-    const [sponsorshipBudget, setSponsorshipBudget] = useState(club.sponsorshipBudget);
-    const [currentBudget, setCurrentBudget] = useState(club.currentBudget);
+    const [sponsorshipBudget, setSponsorshipBudget] = useState(0);
+    const [currentBudget, setCurrentBudget] = useState(0);
     const [isEditingSponsorshipBudget, setIsEditingSponsorshipBudget] = useState(false);
     const [isEditingCurrentBudget, setIsEditingCurrentBudget] = useState(false);
-    const [tempSponsorshipBudget, setTempSponsorshipBudget] = useState(sponsorshipBudget);
-    const [tempCurrentBudget, setTempCurrentBudget] = useState(currentBudget);
+    const [tempSponsorshipBudget, setTempSponsorshipBudget] = useState(0);
+    const [tempCurrentBudget, setTempCurrentBudget] = useState(0);
+    const [isSaving, setIsSaving] = useState(false);
+    const [saveError, setSaveError] = useState(null);
 
-    const handleSaveSponsorshipBudget = () => {
-        setSponsorshipBudget(tempSponsorshipBudget);
-        setIsEditingSponsorshipBudget(false);
+    // State for Core Committee editing
+    const [isEditingCoreCommittee, setIsEditingCoreCommittee] = useState(false);
+    const [tempCoreCommittee, setTempCoreCommittee] = useState([]);
+
+    // Fetch club data on mount
+    useEffect(() => {
+        const fetchClubData = async () => {
+            try {
+                setLoading(true);
+                const response = await fetch(`/api/clubs/${clubId}`);
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch club data");
+                }
+
+                const data = await response.json();
+                setClub(data);
+                setSponsorshipBudget(data.sponsorshipBudget);
+                setCurrentBudget(data.currentBudget);
+                setTempSponsorshipBudget(data.sponsorshipBudget);
+                setTempCurrentBudget(data.currentBudget);
+                setTempCoreCommittee(data.coreCommittee || []);
+            } catch (err) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchClubData();
+    }, [clubId]);
+
+    const handleSaveSponsorshipBudget = async () => {
+        try {
+            setIsSaving(true);
+            setSaveError(null);
+
+            const response = await fetch(`/api/clubs/${clubId}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-role": "dean-sw",
+                },
+                body: JSON.stringify({
+                    sponsorshipBudget: tempSponsorshipBudget,
+                }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to update budget");
+            }
+
+            const updatedClub = await response.json();
+            setSponsorshipBudget(tempSponsorshipBudget);
+            setIsEditingSponsorshipBudget(false);
+            setClub(updatedClub.club);
+        } catch (err) {
+            setSaveError(err.message);
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     const handleCancelSponsorshipBudget = () => {
         setTempSponsorshipBudget(sponsorshipBudget);
         setIsEditingSponsorshipBudget(false);
+        setSaveError(null);
     };
 
-    const handleSaveCurrentBudget = () => {
-        setCurrentBudget(tempCurrentBudget);
-        setIsEditingCurrentBudget(false);
+    const handleSaveCurrentBudget = async () => {
+        try {
+            setIsSaving(true);
+            setSaveError(null);
+
+            const response = await fetch(`/api/clubs/${clubId}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-role": "dean-sw",
+                },
+                body: JSON.stringify({
+                    currentBudget: tempCurrentBudget,
+                }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to update budget");
+            }
+
+            const updatedClub = await response.json();
+            setCurrentBudget(tempCurrentBudget);
+            setIsEditingCurrentBudget(false);
+            setClub(updatedClub.club);
+        } catch (err) {
+            setSaveError(err.message);
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     const handleCancelCurrentBudget = () => {
         setTempCurrentBudget(currentBudget);
         setIsEditingCurrentBudget(false);
+        setSaveError(null);
     };
+
+    const handleEditCoreCommittee = () => {
+        setIsEditingCoreCommittee(true);
+        setSaveError(null);
+    };
+
+    const handleSaveCoreCommittee = async () => {
+        try {
+            setIsSaving(true);
+            setSaveError(null);
+
+            const response = await fetch(`/api/clubs/${clubId}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-role": "dean-sw",
+                },
+                body: JSON.stringify({
+                    coreCommittee: tempCoreCommittee,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to update core committee");
+            }
+
+            const data = await response.json();
+            setClub(data.club);
+            setIsEditingCoreCommittee(false);
+        } catch (err) {
+            setSaveError(err.message);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleCancelCoreCommittee = () => {
+        setTempCoreCommittee(club.coreCommittee || []);
+        setIsEditingCoreCommittee(false);
+        setSaveError(null);
+    };
+
+    const handleCoreCommitteeChange = (index, field, value) => {
+        const updated = [...tempCoreCommittee];
+        updated[index] = { ...updated[index], [field]: value };
+        setTempCoreCommittee(updated);
+    };
+
+    const handleAddMember = () => {
+        setTempCoreCommittee([
+            ...tempCoreCommittee,
+            { name: "", role: "", email: "" },
+        ]);
+    };
+
+    const handleRemoveMember = (index) => {
+        const updated = tempCoreCommittee.filter((_, i) => i !== index);
+        setTempCoreCommittee(updated);
+    };
+
+    // Loading state
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-50">
+                <Navbar />
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <div className="flex items-center justify-center h-64">
+                        <div className="text-center">
+                            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                            <p className="mt-4 text-gray-600">Loading club data...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Error state
+    if (error) {
+        return (
+            <div className="min-h-screen bg-gray-50">
+                <Navbar />
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+                        <h3 className="text-red-800 font-semibold mb-2">Error Loading Club Data</h3>
+                        <p className="text-red-600">{error}</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (!club) {
+        return (
+            <div className="min-h-screen bg-gray-50">
+                <Navbar />
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+                        <p className="text-yellow-800">Club not found</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -144,18 +275,6 @@ export default function ClubDetailsPage() {
                                 {club.name}
                             </h2>
                             <div className="space-y-2">
-                                <p className="text-gray-700">
-                                    <span className="font-semibold">
-                                        Chairperson:
-                                    </span>{" "}
-                                    {club.chairperson}
-                                </p>
-                                <p className="text-gray-700">
-                                    <span className="font-semibold">
-                                        Co-Chairperson:
-                                    </span>{" "}
-                                    {club.coChairperson}
-                                </p>
                                 <p className="text-gray-700">
                                     <span className="font-semibold">
                                         Contact:
@@ -245,17 +364,23 @@ export default function ClubDetailsPage() {
                                                 onChange={(e) => setTempSponsorshipBudget(Number(e.target.value))}
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                                 placeholder="Enter amount"
+                                                disabled={isSaving}
                                             />
+                                            {saveError && (
+                                                <p className="text-xs text-red-600">{saveError}</p>
+                                            )}
                                             <div className="flex gap-2">
                                                 <button
                                                     onClick={handleSaveSponsorshipBudget}
-                                                    className="px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm"
+                                                    disabled={isSaving}
+                                                    className="px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                                 >
-                                                    Save
+                                                    {isSaving ? "Saving..." : "Save"}
                                                 </button>
                                                 <button
                                                     onClick={handleCancelSponsorshipBudget}
-                                                    className="px-3 py-1 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors text-sm"
+                                                    disabled={isSaving}
+                                                    className="px-3 py-1 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                                 >
                                                     Cancel
                                                 </button>
@@ -323,17 +448,23 @@ export default function ClubDetailsPage() {
                                                 onChange={(e) => setTempCurrentBudget(Number(e.target.value))}
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                                 placeholder="Enter amount"
+                                                disabled={isSaving}
                                             />
+                                            {saveError && (
+                                                <p className="text-xs text-red-600">{saveError}</p>
+                                            )}
                                             <div className="flex gap-2">
                                                 <button
                                                     onClick={handleSaveCurrentBudget}
-                                                    className="px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm"
+                                                    disabled={isSaving}
+                                                    className="px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                                 >
-                                                    Save
+                                                    {isSaving ? "Saving..." : "Save"}
                                                 </button>
                                                 <button
                                                     onClick={handleCancelCurrentBudget}
-                                                    className="px-3 py-1 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors text-sm"
+                                                    disabled={isSaving}
+                                                    className="px-3 py-1 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                                                 >
                                                     Cancel
                                                 </button>
@@ -390,7 +521,7 @@ export default function ClubDetailsPage() {
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                    {budgetHistory.map((item, index) => (
+                                    {club.budgetHistory && club.budgetHistory.map((item, index) => (
                                         <tr key={index} className="hover:bg-gray-50">
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                 {new Date(
@@ -443,7 +574,7 @@ export default function ClubDetailsPage() {
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                    {upcomingEvents.map((event, index) => (
+                                    {club.upcomingEvents && club.upcomingEvents.map((event, index) => (
                                         <tr key={index} className="hover:bg-gray-50">
                                             <td className="px-6 py-4 text-sm text-gray-900">
                                                 {event.name}
@@ -478,7 +609,7 @@ export default function ClubDetailsPage() {
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                    {pastEvents.map((event, index) => (
+                                    {club.pastEvents && club.pastEvents.map((event, index) => (
                                         <tr key={index} className="hover:bg-gray-50">
                                             <td className="px-6 py-4 text-sm text-gray-900">
                                                 {event.name}
@@ -502,42 +633,154 @@ export default function ClubDetailsPage() {
                         <h3 className="text-xl font-bold text-gray-900">
                             Core Committee
                         </h3>
-                        
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {coreCommittee.map((member, index) => (
-                            <div
-                                key={index}
-                                className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+                        {!isEditingCoreCommittee && (
+                            <button
+                                onClick={handleEditCoreCommittee}
+                                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center gap-2"
                             >
-                                <div className="flex flex-col items-center text-center">
-                                    {/* Avatar */}
-                                    <div className="h-20 w-20 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold mb-4">
-                                        {member.name.charAt(0)}
-                                    </div>
-
-                                    {/* Name */}
-                                    <h4 className="text-lg font-semibold text-gray-900 mb-1">
-                                        {member.name}
-                                    </h4>
-
-                                    {/* Role */}
-                                    <p className="text-sm text-blue-600 font-medium mb-2">
-                                        {member.role}
-                                    </p>
-
-                                    {/* Email */}
-                                    <a
-                                        href={`mailto:${member.email}`}
-                                        className="text-xs text-gray-600 hover:text-blue-600 transition-colors break-all"
-                                    >
-                                        {member.email}
-                                    </a>
-                                </div>
-                            </div>
-                        ))}
+                                <svg
+                                    className="h-5 w-5"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                                    />
+                                </svg>
+                                Edit Committee
+                            </button>
+                        )}
                     </div>
+
+                    {isEditingCoreCommittee ? (
+                        <div className="bg-white rounded-lg shadow-md p-6 text-black">
+                            {saveError && (
+                                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                                    <p className="text-sm text-red-600">{saveError}</p>
+                                </div>
+                            )}
+                            
+                            <div className="space-y-4 mb-6">
+                                {tempCoreCommittee.map((member, index) => (
+                                    <div key={index} className="p-4 border border-gray-200 rounded-lg bg-gray-50">
+                                        <div className="flex items-start justify-between mb-3">
+                                            <h4 className="text-sm font-semibold text-gray-700">Member {index + 1}</h4>
+                                            <button
+                                                onClick={() => handleRemoveMember(index)}
+                                                disabled={isSaving}
+                                                className="text-red-600 hover:text-red-800 transition-colors disabled:opacity-50"
+                                                title="Remove Member"
+                                            >
+                                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        <div className="grid grid-cols-1 gap-3">
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700 mb-1">Name</label>
+                                                <input
+                                                    type="text"
+                                                    value={member.name}
+                                                    onChange={(e) => handleCoreCommitteeChange(index, "name", e.target.value)}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                                                    placeholder="Enter name"
+                                                    disabled={isSaving}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700 mb-1">Role</label>
+                                                <input
+                                                    type="text"
+                                                    value={member.role}
+                                                    onChange={(e) => handleCoreCommitteeChange(index, "role", e.target.value)}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                                                    placeholder="Enter role"
+                                                    disabled={isSaving}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs font-medium text-gray-700 mb-1">Email</label>
+                                                <input
+                                                    type="email"
+                                                    value={member.email}
+                                                    onChange={(e) => handleCoreCommitteeChange(index, "email", e.target.value)}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                                                    placeholder="Enter email"
+                                                    disabled={isSaving}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={handleAddMember}
+                                    disabled={isSaving}
+                                    className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                >
+                                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                    </svg>
+                                    Add Member
+                                </button>
+                                <button
+                                    onClick={handleSaveCoreCommittee}
+                                    disabled={isSaving}
+                                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {isSaving ? "Saving..." : "Save Changes"}
+                                </button>
+                                <button
+                                    onClick={handleCancelCoreCommittee}
+                                    disabled={isSaving}
+                                    className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                            {club.coreCommittee && club.coreCommittee.map((member, index) => (
+                                <div
+                                    key={index}
+                                    className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+                                >
+                                    <div className="flex flex-col items-center text-center">
+                                        {/* Avatar */}
+                                        <div className="h-20 w-20 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold mb-4">
+                                            {member.name.charAt(0)}
+                                        </div>
+
+                                        {/* Name */}
+                                        <h4 className="text-lg font-semibold text-gray-900 mb-1">
+                                            {member.name}
+                                        </h4>
+
+                                        {/* Role */}
+                                        <p className="text-sm text-blue-600 font-medium mb-2">
+                                            {member.role}
+                                        </p>
+
+                                        {/* Email */}
+                                        <a
+                                            href={`mailto:${member.email}`}
+                                            className="text-xs text-gray-600 hover:text-blue-600 transition-colors break-all"
+                                        >
+                                            {member.email}
+                                        </a>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

@@ -1,82 +1,87 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 
-// Static club data
-const clubsData = {
-    1: {
-        name: "CEV NIT Surat",
-        logo: "/clubs/cev.png",
-        chairperson: "Purv Kabaria",
-        coChairperson: "Vanishka",
-        email: "cev@nitsurat.ac.in",
-        allottedBudget: 60000,
-        sponsorshipBudget: 0,
-        currentBudget: 50000,
-    },
-
-};
-
-const budgetHistory = [
-    {
-        date: "2024-01-15",
-        description: "Initial Allocation",
-        amount: 60000,
-        balance: 60000,
-    },
-    {
-        date: "2024-02-20",
-        description: "StrategiX",
-        amount: -10000,
-        balance: 50000,
-    },
-];
-
-const upcomingEvents = [
-    { name: "Paradox", date: "2025-11-9" },
-    { name: "FinFiesta", date: "2026-2-11" },
-    { name: "Data Science Bootcamp", date: "2025-10-5" },
-];
-
-const pastEvents = [
-    { name: "StrategiX", date: "2025-07-30" },
-];
-
-const coreCommittee = [
-    {
-        name: "Purv Kabaria",
-        role: "Chairperson",
-        email: "purv.dev@gmail.com",
-        avatar: "/avatars/avatar1.png",
-    },
-    {
-        name: "Vanishka",
-        role: "Co-Chairperson",
-        email: "vanishka@gmail.com",
-        avatar: "/avatars/avatar2.png",
-    },
-    {
-        name: "Vasu Sadariya",
-        role: "Tresurer",
-        email: "sadariyavasu5@gmail.com",
-        avatar: "/avatars/avatar3.png",
-    },
-    {
-        name: "Avishkar Jha",
-        role: "Secretary",
-        email: "avishkar.jha@gmail.com",
-        avatar: "/avatars/avatar4.png",
-    },
-];
-
 export default function ClubDetailsPage() {
     const params = useParams();
     const clubId = params.id;
-    const club = clubsData[clubId] || clubsData[1];
+
+    // State for club data
+    const [club, setClub] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    // Fetch club data on mount
+    useEffect(() => {
+        const fetchClubData = async () => {
+            try {
+                setLoading(true);
+                const response = await fetch(`/api/clubs/${clubId}`);
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch club data");
+                }
+
+                const data = await response.json();
+                setClub(data);
+            } catch (err) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchClubData();
+    }, [clubId]);
+
+    // Loading state
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-50">
+                <Navbar />
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <div className="flex items-center justify-center h-64">
+                        <div className="text-center">
+                            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                            <p className="mt-4 text-gray-600">Loading club data...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Error state
+    if (error) {
+        return (
+            <div className="min-h-screen bg-gray-50">
+                <Navbar />
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+                        <h3 className="text-red-800 font-semibold mb-2">Error Loading Club Data</h3>
+                        <p className="text-red-600">{error}</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (!club) {
+        return (
+            <div className="min-h-screen bg-gray-50">
+                <Navbar />
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+                        <p className="text-yellow-800">Club not found</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -116,18 +121,6 @@ export default function ClubDetailsPage() {
                                 {club.name}
                             </h2>
                             <div className="space-y-2">
-                                <p className="text-gray-700">
-                                    <span className="font-semibold">
-                                        Chairperson:
-                                    </span>{" "}
-                                    {club.chairperson}
-                                </p>
-                                <p className="text-gray-700">
-                                    <span className="font-semibold">
-                                        Co-Chairperson:
-                                    </span>{" "}
-                                    {club.coChairperson}
-                                </p>
                                 <p className="text-gray-700">
                                     <span className="font-semibold">
                                         Contact:
@@ -265,7 +258,7 @@ export default function ClubDetailsPage() {
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                    {budgetHistory.map((item, index) => (
+                                    {club.budgetHistory && club.budgetHistory.map((item, index) => (
                                         <tr key={index} className="hover:bg-gray-50">
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                 {new Date(
@@ -318,7 +311,7 @@ export default function ClubDetailsPage() {
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                    {upcomingEvents.map((event, index) => (
+                                    {club.upcomingEvents && club.upcomingEvents.map((event, index) => (
                                         <tr key={index} className="hover:bg-gray-50">
                                             <td className="px-6 py-4 text-sm text-gray-900">
                                                 {event.name}
@@ -353,7 +346,7 @@ export default function ClubDetailsPage() {
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                    {pastEvents.map((event, index) => (
+                                    {club.pastEvents && club.pastEvents.map((event, index) => (
                                         <tr key={index} className="hover:bg-gray-50">
                                             <td className="px-6 py-4 text-sm text-gray-900">
                                                 {event.name}
@@ -381,7 +374,7 @@ export default function ClubDetailsPage() {
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {coreCommittee.map((member, index) => (
+                        {club.coreCommittee && club.coreCommittee.map((member, index) => (
                             <div
                                 key={index}
                                 className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"

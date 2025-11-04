@@ -118,7 +118,7 @@ export default function DeanSWDashboard() {
                             <td className="px-6 py-4 whitespace-nowrap">
                               <button 
                                 onClick={() => router.push(`/dashboard/dean-sw/review/${doc._id}`)}
-                                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md text-sm"
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 cursor-pointer rounded-md text-sm"
                               >
                                 Review
                               </button>
