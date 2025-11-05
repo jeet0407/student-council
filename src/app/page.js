@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import ComplaintModal from "../components/ComplaintModal";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
@@ -12,6 +13,8 @@ export default function Page() {
     const router = useRouter();
     const [showNavbar, setShowNavbar] = useState(true);
     const [lastScrollY, setLastScrollY] = useState(0);
+    const [isComplaintModalOpen, setIsComplaintModalOpen] = useState(false);
+    const [showSuccessToast, setShowSuccessToast] = useState(false);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -43,6 +46,14 @@ export default function Page() {
             });
         }
     }
+
+    const handleComplaintSuccess = () => {
+        setIsComplaintModalOpen(false);
+        setShowSuccessToast(true);
+        setTimeout(() => {
+            setShowSuccessToast(false);
+        }, 5000);
+    };
 
     return (
         <div className="bg-white min-h-screen">
@@ -103,6 +114,14 @@ export default function Page() {
                             >
                                 Get Started
                             </button>
+                            {!session && (
+                                <button
+                                    onClick={() => setIsComplaintModalOpen(true)}
+                                    className="w-full sm:w-auto py-3 px-8 bg-red-600 text-white border-none rounded-md cursor-pointer hover:bg-red-700 transition-colors text-base sm:text-lg font-medium shadow-lg hover:shadow-xl"
+                                >
+                                    Register a Complaint
+                                </button>
+                            )}
                         </div>
                     </div>
 
@@ -281,6 +300,55 @@ export default function Page() {
             </main>
 
             <Footer />
+
+            {/* Complaint Modal */}
+            <ComplaintModal
+                isOpen={isComplaintModalOpen}
+                onClose={() => setIsComplaintModalOpen(false)}
+                onSuccess={handleComplaintSuccess}
+            />
+
+            {/* Success Toast */}
+            {showSuccessToast && (
+                <div className="fixed top-20 right-4 z-50 animate-fade-in">
+                    <div className="bg-green-600 text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-3">
+                        <svg
+                            className="h-6 w-6"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M5 13l4 4L19 7"
+                            />
+                        </svg>
+                        <span className="font-medium">
+                            Complaint submitted successfully!
+                        </span>
+                        <button
+                            onClick={() => setShowSuccessToast(false)}
+                            className="ml-4 text-white hover:text-gray-200"
+                        >
+                            <svg
+                                className="h-5 w-5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M6 18L18 6M6 6l12 12"
+                                />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

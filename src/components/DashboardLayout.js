@@ -55,6 +55,7 @@ export default function DashboardLayout({ children }) {
           { name: 'Upcoming Event', href: '/dashboard/dean-sw/upcoming-event' },
           { name: 'Announcements', href: '/dashboard/dean-sw/announcements' },
           { name: 'Clubs', href: '/dashboard/dean-sw/clubs' },
+          { name: 'Complaints', href: '/dashboard/dean-sw/complaints' },
         ];
       default:
         return [{ name: 'Dashboard', href: '/dashboard' }];
