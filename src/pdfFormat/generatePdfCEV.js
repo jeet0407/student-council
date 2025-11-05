@@ -338,7 +338,7 @@ export const CEVConfig = {
       },
       {
         title: 'Recommended/Not Recommended',
-        name: 'Dr. Shweta N. Shah',
+        name: 'Dr. Manish Rathod',
         designation: 'Associate Dean (SW)',
         width: '30%',
       },
