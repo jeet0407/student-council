@@ -159,7 +159,7 @@ const MyDocument = ({ data, formatDate }) => {
           <Text style={styles.tableCell}>Quantity</Text>
         </View>
         <View style={[styles.tableCol, { width: '20%', borderRightWidth: 0 }]}>
-          <Text style={styles.tableCell}>Amount (₹)</Text>
+          <Text style={styles.tableCell}>Amount</Text>
         </View>
       </View>
       {(financialData || []).map((item, index) => (

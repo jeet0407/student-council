@@ -1,103 +1,354 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
+import ComplaintModal from "../components/ComplaintModal";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
-export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.js
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+export default function Page() {
+    const { data: session, status } = useSession();
+    const router = useRouter();
+    const [showNavbar, setShowNavbar] = useState(true);
+    const [lastScrollY, setLastScrollY] = useState(0);
+    const [isComplaintModalOpen, setIsComplaintModalOpen] = useState(false);
+    const [showSuccessToast, setShowSuccessToast] = useState(false);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+    useEffect(() => {
+        const handleScroll = () => {
+            const currentScrollY = window.scrollY;
+            
+            // Show navbar when scrolling up or at the top
+            if (currentScrollY < lastScrollY || currentScrollY < 100) {
+                setShowNavbar(true);
+            } else {
+                // Hide navbar when scrolling down
+                setShowNavbar(false);
+            }
+            
+            setLastScrollY(currentScrollY);
+        };
+
+        window.addEventListener("scroll", handleScroll, { passive: true });
+        
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, [lastScrollY]);
+
+    function handleGetStarted(e) {
+        e.preventDefault();
+        const eventsSection = document.getElementById("upcoming-events");
+        if (eventsSection) {
+            eventsSection.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+            });
+        }
+    }
+
+    const handleComplaintSuccess = () => {
+        setIsComplaintModalOpen(false);
+        setShowSuccessToast(true);
+        setTimeout(() => {
+            setShowSuccessToast(false);
+        }, 5000);
+    };
+
+    return (
+        <div className="bg-white min-h-screen">
+            <main>
+                <section className="h-screen flex items-center justify-center relative overflow-hidden">
+                    {/* Background Video */}
+                    <video
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        preload="auto"
+                        webkit-playsinline="true"
+                        x5-playsinline="true"
+                        className="absolute inset-0 w-full h-full object-cover z-0"
+                        poster="/hero.png"
+                        onLoadedMetadata={(e) => {
+                            e.target.play().catch(error => {
+                                console.log("Video autoplay failed:", error);
+                            });
+                        }}
+                    >
+                        <source src="/s-c.mp4" type="video/mp4" />
+                        Your browser does not support the video tag.
+                    </video>
+                    
+                    {/* Fallback image for when video fails */}
+                    <Image
+                        src="/hero.png"
+                        alt="Hero background"
+                        fill
+                        className="object-cover object-center -z-10"
+                        priority
+                    />
+
+                    {/* Navbar - Fixed with scroll detection */}
+                    <div 
+                        className={`fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm shadow-md transition-transform duration-300 ${
+                            showNavbar ? 'translate-y-0' : '-translate-y-full'
+                        }`}
+                    >
+                        <Navbar />
+                    </div>
+
+                    {/* Dark Overlay */}
+                    <div className="absolute inset-0 bg-black/50 z-[1]" />
+
+                    {/* Content */}
+                    <div className="relative text-center z-[2] px-4 sm:px-6 flex flex-col items-center justify-center">
+                        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl mb-4 md:mb-6 font-bold text-white drop-shadow-2xl">
+                            Welcome to SVNIT SAMPARK
+                        </h1>
+
+                        <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+                            <button
+                                onClick={handleGetStarted}
+                                className="w-full sm:w-auto py-3 px-8 bg-blue-600 text-white border-none rounded-md cursor-pointer hover:bg-blue-700 transition-colors text-base sm:text-lg font-medium shadow-lg hover:shadow-xl"
+                            >
+                                Get Started
+                            </button>
+                            {!session && (
+                                <button
+                                    onClick={() => setIsComplaintModalOpen(true)}
+                                    className="w-full sm:w-auto py-3 px-8 bg-red-600 text-white border-none rounded-md cursor-pointer hover:bg-red-700 transition-colors text-base sm:text-lg font-medium shadow-lg hover:shadow-xl"
+                                >
+                                    Register a Complaint
+                                </button>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Scroll Down Indicator */}
+                    <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-[2] animate-bounce">
+                        <svg
+                            className="w-6 h-6 text-white"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M19 14l-7 7m0 0l-7-7m7 7V3"
+                            />
+                        </svg>
+                    </div>
+                </section>
+
+                {/* Upcoming Events Section */}
+                <section
+                    id="upcoming-events"
+                    className="py-12 md:py-16 lg:py-20 px-4 sm:px-6 md:px-8 lg:px-12"
+                >
+                    <div className="max-w-7xl mx-auto">
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-gray-900 mb-8 md:mb-12">
+                            Upcoming Events
+                        </h2>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+                            {/* Event Card 1 */}
+                            <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                                <div className="relative h-48 sm:h-52 md:h-56 bg-gradient-to-br from-blue-400 to-blue-600">
+                                    <Image
+                                        src="/Kashish-Logo.png"
+                                        alt="Tech Fest 2025"
+                                        fill
+                                        className="object-cover"
+                                    />
+                                </div>
+                                <div className="p-4 sm:p-5">
+                                    <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
+                                        Kashish 2025
+                                    </h3>
+                                    <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+                                        THE OFFICIAL FRESHER’S PARTY
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Event Card 2 */}
+                            <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                                <div className="relative h-48 sm:h-52 md:h-56 bg-gradient-to-br from-green-400 to-green-600">
+                                    <Image
+                                        src="/thanganat.png"
+                                        alt="Cultural Night"
+                                        fill
+                                        className="object-cover"
+                                    />
+                                </div>
+                                <div className="p-4 sm:p-5">
+                                    <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
+                                        Thanganat 2025
+                                    </h3>
+                                    <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+                                        Official Garba Nights of SVNIT 🎉
+                                        Embrace the beats of tradition and the
+                                        spirit of celebration with us! 🥁
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Announcements Section */}
+                <section className="py-12 md:py-16 lg:py-20 px-4 sm:px-6 md:px-8 lg:px-12 bg-gray-50">
+                    <div className="max-w-7xl mx-auto">
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center text-gray-900 mb-8 md:mb-12">
+                            Announcements
+                        </h2>
+
+                        <div className="space-y-8 md:space-y-12">
+                            {/* Announcement 1 - Image on Right */}
+                            <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                                <div className="flex flex-col md:flex-row">
+                                    <div className="flex-1 p-6 sm:p-8 md:p-10 flex flex-col justify-center">
+                                        <h3 className="text-xl sm:text-2xl md:text-3xl font-semibold text-gray-900 mb-3 md:mb-4">
+                                            New Academic Session Guidelines
+                                        </h3>
+                                        <p className="text-sm sm:text-base md:text-lg text-gray-600 leading-relaxed">
+                                            Important updates regarding the new
+                                            academic session. All students are
+                                            requested to review the updated
+                                            guidelines for attendance,
+                                            examinations, and course
+                                            registration procedures.
+                                        </p>
+                                        <div className="mt-4 text-sm text-gray-500">
+                                            Posted on: October 25, 2025
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Announcement 2 - Image on Left (reversed on desktop) */}
+                            <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                                <div className="flex flex-col md:flex-row-reverse">
+                                    <div className="flex-1 p-6 sm:p-8 md:p-10 flex flex-col justify-center">
+                                        <h3 className="text-xl sm:text-2xl md:text-3xl font-semibold text-gray-900 mb-3 md:mb-4">
+                                            Fee Remission Applications Open
+                                        </h3>
+                                        <p className="text-sm sm:text-base md:text-lg text-gray-600 leading-relaxed">
+                                            Applications for merit-based and
+                                            need-based scholarships are now
+                                            open. Eligible students can apply
+                                            through the student portal before
+                                            the deadline. Don&apos;t miss this
+                                            opportunity!
+                                        </p>
+                                        <div className="mt-4 text-sm text-gray-500">
+                                            Posted on: October 28, 2025
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Announcement 3 - Image on Right */}
+                            <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                                <div className="flex flex-col md:flex-row">
+                                    <div className="flex-1 p-6 sm:p-8 md:p-10 flex flex-col justify-center">
+                                        <h3 className="text-xl sm:text-2xl md:text-3xl font-semibold text-gray-900 mb-3 md:mb-4">
+                                            Campus Placement Drive 2025
+                                        </h3>
+                                        <p className="text-sm sm:text-base md:text-lg text-gray-600 leading-relaxed">
+                                            The placement season kicks off next
+                                            month with top companies visiting
+                                            campus. Final year students should
+                                            update their resumes and register
+                                            for pre-placement talks through the
+                                            training and placement cell.
+                                        </p>
+                                        <div className="mt-4 text-sm text-gray-500">
+                                            Posted on: October 30, 2025
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Announcement 4 - Image on Left (reversed on desktop) */}
+                            <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                                <div className="flex flex-col md:flex-row-reverse">
+                                    <div className="flex-1 p-6 sm:p-8 md:p-10 flex flex-col justify-center">
+                                        <h3 className="text-xl sm:text-2xl md:text-3xl font-semibold text-gray-900 mb-3 md:mb-4">
+                                            Library Extended Hours
+                                        </h3>
+                                        <p className="text-sm sm:text-base md:text-lg text-gray-600 leading-relaxed">
+                                            Due to upcoming examinations, the
+                                            central library will now remain open
+                                            until 2:00 AM on weekdays. Students
+                                            can utilize the extended hours for
+                                            better preparation and research
+                                            work.
+                                        </p>
+                                        <div className="mt-4 text-sm text-gray-500">
+                                            Posted on: October 31, 2025
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+
+            <Footer />
+
+            {/* Complaint Modal */}
+            <ComplaintModal
+                isOpen={isComplaintModalOpen}
+                onClose={() => setIsComplaintModalOpen(false)}
+                onSuccess={handleComplaintSuccess}
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+
+            {/* Success Toast */}
+            {showSuccessToast && (
+                <div className="fixed top-20 right-4 z-50 animate-fade-in">
+                    <div className="bg-green-600 text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-3">
+                        <svg
+                            className="h-6 w-6"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M5 13l4 4L19 7"
+                            />
+                        </svg>
+                        <span className="font-medium">
+                            Complaint submitted successfully!
+                        </span>
+                        <button
+                            onClick={() => setShowSuccessToast(false)}
+                            className="ml-4 text-white hover:text-gray-200"
+                        >
+                            <svg
+                                className="h-5 w-5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M6 18L18 6M6 6l12 12"
+                                />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+    );
 }

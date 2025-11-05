@@ -5,16 +5,10 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { PDFViewer, pdf } from '@react-pdf/renderer';
 import DashboardLayout from '@/components/DashboardLayout';
-import SignaturePad from '@/components/SignaturePad';
 import { saveAs } from 'file-saver';
-
-// Import the new PDF format system
 import { getPDFComponent, PDFFormatTypes } from '@/pdfFormat';
 
-
-
 export default function DocumentPreview({ params }) {
-  // Use React.use to properly unwrap the params
   const documentId = React.use(params).id;
   
   const router = useRouter();
@@ -22,21 +16,22 @@ export default function DocumentPreview({ params }) {
   const [document, setDocument] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [signature, setSignature] = useState(null);
-  const [showSignatureModal, setShowSignatureModal] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [signatureError, setSignatureError] = useState("");
   const [pdfError, setPdfError] = useState(null);
-  const [pdfLoading, setPdfLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   
-  // Layout options for PDF
-  const [layoutOptions, setLayoutOptions] = useState({
-    moveFinancialToPage2: false,
-    moveAboutEventToPage2: false,
-    moveSignaturesToPage2: false,
-  });
-  
-  // Fetch document data
+  useEffect(() => {
+    // Check if device is mobile
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   useEffect(() => {
     if (status === 'authenticated' && documentId) {
       fetchDocument(documentId);
@@ -52,7 +47,6 @@ export default function DocumentPreview({ params }) {
       
       const data = await response.json();
       
-      // Add default financialProposal if it doesn't exist
       if (!data.financialProposal) {
         data.financialProposal = [];
       }
@@ -66,45 +60,11 @@ export default function DocumentPreview({ params }) {
     }
   };
 
-  const handleEditDocument = () => {
-    router.push(`/dashboard/student/edit-document/${documentId}`);
-  };
-
-  const handleShowSignatureModal = () => {
-    setShowSignatureModal(true);
-  };
-
-  const handleSignatureCapture = (signatureData) => {
-    setSignature(signatureData);
-    setShowSignatureModal(false);
-  };
-
-  const handleClearSignature = () => {
-    setSignature(null);
-  };
-
-  // Handle layout option changes
-  const handleLayoutOptionChange = (option) => {
-    setLayoutOptions(prev => ({
-      ...prev,
-      [option]: !prev[option],
-    }));
-  };
-
   const handleDownloadPDF = async () => {
     try {
       setPdfError(null);
-      
-      // Use CEV format directly
       const PDFComponent = getPDFComponent(PDFFormatTypes.CLUB_EVENT_VOUCHER);
-      
-      const asPdf = pdf(
-        <PDFComponent 
-          document={document} 
-          signature={signature} 
-          {...layoutOptions}
-        />
-      );
+      const asPdf = pdf(<PDFComponent document={document} />);
       const blob = await asPdf.toBlob();
       saveAs(blob, `document-${documentId}.pdf`);
     } catch (err) {
@@ -114,119 +74,55 @@ export default function DocumentPreview({ params }) {
   };
 
   const handleSubmitDocument = async () => {
-    if (!signature) {
-      setSignatureError("Please add your signature before submitting.");
+    if (!confirm('Are you sure you want to submit this document? Once submitted, you cannot edit it anymore.')) {
       return;
     }
 
-    setIsSubmitting(true);
+    setSubmitting(true);
     try {
-      // First, upload the signature image
-      const signatureFormData = new FormData();
-      signatureFormData.append('signature', dataURLtoFile(signature, 'student-signature.png'));
-      signatureFormData.append('documentId', documentId);
-      signatureFormData.append('role', 'student');
-
-      const signatureResponse = await fetch('/api/documents/signature', {
+      const response = await fetch(`/api/documents/${documentId}/submit`, {
         method: 'POST',
-        body: signatureFormData,
       });
 
-      if (!signatureResponse.ok) {
-        throw new Error('Failed to upload signature');
+      if (!response.ok) {
+        throw new Error('Failed to submit document');
       }
 
-      const signatureResult = await signatureResponse.json();
-      
-      // Generate PDF document using CEV format
-      const PDFComponent = getPDFComponent(PDFFormatTypes.CLUB_EVENT_VOUCHER);
-      
-      const asPdf = pdf(
-        <PDFComponent 
-          document={document} 
-          signature={signature} 
-          {...layoutOptions}
-        />
-      );
-      const blob = await asPdf.toBlob();
-      
-      // Create form data for PDF upload
-      const pdfFormData = new FormData();
-      pdfFormData.append('pdf', blob, 'document.pdf');
-      pdfFormData.append('documentId', documentId);
-      pdfFormData.append('version', 'studentSigned');
-      
-      // Upload PDF
-      const pdfResponse = await fetch('/api/documents/pdf', {
-        method: 'POST',
-        body: pdfFormData,
-      });
-      
-      if (!pdfResponse.ok) {
-        throw new Error('Failed to upload PDF');
-      }
-      
-      const pdfResult = await pdfResponse.json();
-      
-      // Then update the document status
-      const updateResponse = await fetch(`/api/documents/${documentId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          signatures: {
-            student: signatureResult.signaturePath
-          },
-          pdfVersions: {
-            studentSigned: pdfResult.pdfPath
-          },
-          layoutOptions: layoutOptions, // Store layout preferences
-          status: 'pending_faculty',
-        }),
-      });
-
-      if (!updateResponse.ok) {
-        throw new Error('Failed to update document');
-      }
-
-      // Redirect to student dashboard
+      alert('Document submitted successfully! It has been sent to Faculty for approval.');
       router.push('/dashboard/student');
-      
     } catch (err) {
       console.error('Error submitting document:', err);
-      setError(`Failed to submit document: ${err.message}`);
+      alert('Failed to submit document. Please try again.');
     } finally {
-      setIsSubmitting(false);
+      setSubmitting(false);
     }
   };
 
-  // Helper to convert data URL to file object
-  const dataURLtoFile = (dataurl, filename) => {
-    const arr = dataurl.split(',');
-    const mime = arr[0].match(/:(.*?);/)[1];
-    const bstr = atob(arr[1]);
-    let n = bstr.length;
-    const u8arr = new Uint8Array(n);
-    
-    while(n--){
-      u8arr[n] = bstr.charCodeAt(n);
-    }
-    
-    return new File([u8arr], filename, {type: mime});
+  const handleEditDocument = () => {
+    router.push(`/dashboard/student/edit-document/${documentId}`);
   };
 
-  // Render PDF using CEV format
+  const getStatusBadge = (status) => {
+    const badges = {
+      draft: { bg: 'bg-gray-100', text: 'text-gray-800', label: 'Draft' },
+      pending_faculty: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Pending Faculty' },
+      pending_dean_swo: { bg: 'bg-blue-100', text: 'text-blue-800', label: 'Pending Dean SWO' },
+      pending_dean_sw: { bg: 'bg-purple-100', text: 'text-purple-800', label: 'Pending Dean SW' },
+      passed: { bg: 'bg-green-100', text: 'text-green-800', label: 'Passed' },
+      rejected: { bg: 'bg-red-100', text: 'text-red-800', label: 'Rejected' },
+    };
+    const badge = badges[status] || badges.draft;
+    return (
+      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${badge.bg} ${badge.text}`}>
+        {badge.label}
+      </span>
+    );
+  };
+
   const renderPDF = () => {
     try {
       const PDFComponent = getPDFComponent(PDFFormatTypes.CLUB_EVENT_VOUCHER);
-      return (
-        <PDFComponent 
-          document={document} 
-          signature={signature}
-          {...layoutOptions}
-        />
-      );
+      return <PDFComponent document={document} />;
     } catch (err) {
       console.error('Error rendering PDF:', err);
       setPdfError(`Error rendering PDF: ${err.message}`);
@@ -237,7 +133,7 @@ export default function DocumentPreview({ params }) {
   if (status === 'loading' || loading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center h-64">
+        <div className="flex items-center text-black justify-center h-64">
           <div className="text-center">
             <div className="spinner h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
             <p className="mt-2">Loading document...</p>
@@ -275,118 +171,163 @@ export default function DocumentPreview({ params }) {
 
   return (
     <DashboardLayout>
-      <div className="container mx-auto px-4 py-6">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold text-black">Document Preview</h1>
-          <div className="flex space-x-3">
+      <div className="container mx-auto px-3 sm:px-4 md:px-6 py-4 md:py-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-4 md:mb-6">
+          <h1 className="text-xl sm:text-2xl font-bold text-black">Document Preview</h1>
+          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
             <button
               onClick={() => router.push('/dashboard/student')}
-              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+              className="flex-1 sm:flex-none px-3 sm:px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
             >
-              Cancel
+              Back to Dashboard
             </button>
-            <button
-              onClick={handleEditDocument}
-              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-            >
-              Edit Document
-            </button>
-            <button
-              onClick={handleDownloadPDF}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              Download PDF
-            </button>
+            {document.status === 'draft' && (
+              <>
+                <button
+                  onClick={handleEditDocument}
+                  className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                >
+                  Edit Document
+                </button>
+                <button
+                  onClick={handleSubmitDocument}
+                  disabled={submitting}
+                  className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {submitting ? 'Submitting...' : 'Submit to Faculty'}
+                </button>
+              </>
+            )}
+            {document.status === 'passed' && (
+              <button
+                onClick={handleDownloadPDF}
+                className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                Download PDF
+              </button>
+            )}
           </div>
+        </div>
+
+        {/* Document Info Card */}
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6 mb-4 md:mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <div>
+              <span className="font-medium text-gray-700 text-sm sm:text-base">Title:</span>
+              <p className="text-black text-sm sm:text-base mt-1">{document.title}</p>
+            </div>
+            <div>
+              <span className="font-medium text-gray-700 text-sm sm:text-base">Status:</span>
+              <div className="mt-1">{getStatusBadge(document.status)}</div>
+            </div>
+            <div>
+              <span className="font-medium text-gray-700 text-sm sm:text-base">Club:</span>
+              <p className="text-black text-sm sm:text-base mt-1">{document.clubName}</p>
+            </div>
+            <div>
+              <span className="font-medium text-gray-700 text-sm sm:text-base">Submitted:</span>
+              <p className="text-black text-sm sm:text-base mt-1">{new Date(document.createdAt).toLocaleDateString()}</p>
+            </div>
+          </div>
+          
+          {/* Show feedback if rejected */}
+          {document.status === 'rejected' && document.feedback && (
+            <div className="mt-4 p-3 sm:p-4 bg-red-50 border border-red-200 rounded">
+              <h3 className="font-semibold text-red-800 mb-2 text-sm sm:text-base">Rejection Feedback:</h3>
+              <p className="text-red-700 text-sm sm:text-base">{document.feedback}</p>
+            </div>
+          )}
+
+          {/* Show approval history if available */}
+          {document.approvalHistory && document.approvalHistory.length > 0 && (
+            <div className="mt-4">
+              <h3 className="font-semibold text-gray-800 mb-2 text-sm sm:text-base">Approval History:</h3>
+              <div className="space-y-2">
+                {document.approvalHistory.map((history, index) => (
+                  <div key={index} className="text-xs sm:text-sm flex flex-col sm:flex-row sm:items-center gap-2">
+                    <span className={`px-2 py-1 rounded text-xs font-semibold whitespace-nowrap w-fit ${
+                      history.action === 'approved' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    }`}>
+                      {history.action === 'approved' ? '✓' : '✗'} {history.role.toUpperCase()}
+                    </span>
+                    <span className="text-gray-600">
+                      {new Date(history.approvedAt).toLocaleDateString()}
+                    </span>
+                    {history.feedback && (
+                      <span className="text-gray-700 italic break-words">- {history.feedback}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* PDF Error */}
         {pdfError && (
-          <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
-            <p className="text-red-700">{pdfError}</p>
+          <div className="bg-red-50 border-l-4 border-red-500 p-3 sm:p-4 mb-4">
+            <p className="text-red-700 text-sm sm:text-base">{pdfError}</p>
           </div>
         )}
 
-        {/* Layout options */}
-        <div className="mb-3 flex gap-3 flex-wrap">
-          <button
-            onClick={() => handleLayoutOptionChange('moveFinancialToPage2')}
-            className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium bg-white text-black hover:bg-gray-50"
-          >
-            {layoutOptions.moveFinancialToPage2 ? "Move Financial to Page 1" : "Move Financial to Page 2"}
-          </button>
-          <button
-            onClick={() => handleLayoutOptionChange('moveAboutEventToPage2')}
-            className="px-4 py-2 border text-black border-gray-300 rounded-md text-sm font-medium bg-white hover:bg-gray-50"
-          >
-            {layoutOptions.moveAboutEventToPage2 ? "Move About Event to Page 1" : "Move About Event to Page 2"}
-          </button>
-          <button
-            onClick={() => handleLayoutOptionChange('moveSignaturesToPage2')}
-            className="px-4 py-2 border text-black border-gray-300 rounded-md text-sm font-medium bg-white hover:bg-gray-50"
-          >
-            {layoutOptions.moveSignaturesToPage2 ? "Move Signatures to Page 1" : "Move Signatures to Page 2"}
-          </button>
-        </div>
-
-        {/* PDF Preview */}
-        <div className="mb-6 border-2 border-gray-200 rounded-lg overflow-hidden" style={{ height: "70vh" }}>
-          <div className="h-full w-full">
-            <PDFViewer 
-              width="100%" 
-              height="100%" 
-              style={{ border: "none" }}
-              onLoadSuccess={() => setPdfLoading(false)}
-            >
-              {renderPDF()}
-            </PDFViewer>
+        {/* PDF Preview - Desktop */}
+        {!isMobile ? (
+          <div className="mb-4 md:mb-6 border-2 border-gray-200 rounded-lg overflow-hidden bg-white" style={{ height: "60vh", minHeight: "400px" }}>
+            <div className="h-full w-full">
+              <PDFViewer 
+                width="100%" 
+                height="100%" 
+                style={{ border: "none" }}
+                showToolbar={true}
+              >
+                {renderPDF()}
+              </PDFViewer>
+            </div>
           </div>
-        </div>
+        ) : (
+          /* Mobile - Show Download Button and Document Details */
+          <div className="mb-4 bg-white border-2 border-gray-200 rounded-lg p-6">
+            <div className="text-center">
+              <svg 
+                className="w-16 h-16 mx-auto text-blue-600 mb-4" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth="2" 
+                  d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                />
+              </svg>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                PDF Preview Not Available on Mobile
+              </h3>
+              <p className="text-sm text-gray-600 mb-6">
+                Download the PDF to view it on your device
+              </p>
+              <button
+                onClick={handleDownloadPDF}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-md transition-colors flex items-center justify-center gap-2"
+              >
+                <svg 
+                  className="w-5 h-5" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    strokeWidth="2" 
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                  />
+                </svg>
+                Download PDF Document
+              </button>
+              
 
-        {/* Action Buttons */}
-        <div className="flex justify-end space-x-4 mb-8">
-          {!signature && (
-            <button
-              onClick={handleShowSignatureModal}
-              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              Add Signature
-            </button>
-          )}
-
-          {signature && (
-            <button
-              onClick={handleClearSignature}
-              className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500"
-            >
-              Clear Signature
-            </button>
-          )}
-
-          <button
-            onClick={handleSubmitDocument}
-            disabled={isSubmitting || !signature}
-            className={`px-6 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500
-              ${isSubmitting || !signature 
-                ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
-                : 'bg-green-600 text-white hover:bg-green-700'}`}
-          >
-            {isSubmitting ? 'Submitting...' : 'Submit Document'}
-          </button>
-        </div>
-
-        {signatureError && (
-          <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
-            <p className="text-red-700">{signatureError}</p>
-          </div>
-        )}
-
-        {/* Signature Modal */}
-        {showSignatureModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-lg w-full max-w-xl">
-              <h2 className="text-xl font-bold mb-4">Add Your Signature</h2>
-              <SignaturePad onSave={handleSignatureCapture} onCancel={() => setShowSignatureModal(false)} />
             </div>
           </div>
         )}

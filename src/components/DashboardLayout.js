@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { useSession, signOut } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import Image from 'next/image';
+import Navbar from './Navbar';
 
 export default function DashboardLayout({ children }) {
   const { data: session } = useSession();
@@ -30,25 +31,31 @@ export default function DashboardLayout({ children }) {
         return [
           { name: 'Dashboard', href: dashboardPath },
           { name: 'New Document', href: '/dashboard/student/new-document' },
-          { name: 'My Documents', href: '/dashboard/student/documents' },
+          { name: 'Upcoming Event', href: '/dashboard/student/upcoming-event' },
+          { name: 'Announcements', href: '/dashboard/student/announcements' },
+          { name: 'Club', href: '/dashboard/student/clubs' },
         ];
       case 'faculty':
         return [
           { name: 'Dashboard', href: dashboardPath },
-          { name: 'Pending Documents', href: '/dashboard/faculty/pending' },
-          { name: 'Processed History', href: '/dashboard/faculty/history' },
+          { name: 'Upcoming Event', href: '/dashboard/faculty/upcoming-event' },
+          { name: 'Announcements', href: '/dashboard/faculty/announcements' },
+          { name: 'Clubs', href: '/dashboard/faculty/clubs' },
         ];
       case 'dean_swo':
         return [
           { name: 'Dashboard', href: dashboardPath },
-          { name: 'Pending Documents', href: '/dashboard/dean-swo/pending' },
-          { name: 'Processed History', href: '/dashboard/dean-swo/history' },
+          { name: 'Upcoming Event', href: '/dashboard/dean-swo/upcoming-event' },
+          { name: 'Announcements', href: '/dashboard/dean-swo/announcements' },
+          { name: 'Clubs', href: '/dashboard/dean-swo/clubs' },
         ];
       case 'dean_sw':
         return [
           { name: 'Dashboard', href: dashboardPath },
-          { name: 'Pending Documents', href: '/dashboard/dean-sw/pending' },
-          { name: 'Processed History', href: '/dashboard/dean-sw/history' },
+          { name: 'Upcoming Event', href: '/dashboard/dean-sw/upcoming-event' },
+          { name: 'Announcements', href: '/dashboard/dean-sw/announcements' },
+          { name: 'Clubs', href: '/dashboard/dean-sw/clubs' },
+          { name: 'Complaints', href: '/dashboard/dean-sw/complaints' },
         ];
       default:
         return [{ name: 'Dashboard', href: '/dashboard' }];
@@ -59,46 +66,8 @@ export default function DashboardLayout({ children }) {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Header */}
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center">
-              <button 
-                onClick={toggleSidebar}
-                className="md:hidden mr-3 text-gray-600 hover:text-gray-800"
-              >
-                <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-              <div className="flex items-center">
-                <Image 
-                  src="/logo-svnit.png" 
-                  alt="SVNIT Logo" 
-                  width={40} 
-                  height={40} 
-                  className="h-8 w-auto"
-                />
-                <h1 className="ml-2 text-lg font-medium text-gray-900">SVNIT Clubs Portal</h1>
-              </div>
-            </div>
-            {session?.user && (
-              <div className="flex items-center">
-                <span className="mr-4 text-sm text-gray-700 hidden md:block">
-                  {session.user.name}
-                </span>
-                <button
-                  onClick={() => signOut({ callbackUrl: '/login' })}
-                  className="text-sm text-red-600 hover:text-red-800"
-                >
-                  Sign Out
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </header>
+      {/* Navbar */}
+      <Navbar />
 
       {/* Sidebar and Content */}
       <div className="flex">
@@ -127,7 +96,7 @@ export default function DashboardLayout({ children }) {
                     height={40} 
                     className="h-8 w-auto"
                   />
-                  <h2 className="ml-2 text-lg font-medium text-gray-900">SVNIT Clubs Portal</h2>
+                  <h2 className="ml-2 text-lg font-medium text-gray-900">Dashboard Menu</h2>
                 </div>
                 <nav className="px-2 space-y-1">
                   {navigationLinks.map((link) => (
@@ -135,6 +104,7 @@ export default function DashboardLayout({ children }) {
                       key={link.name}
                       href={link.href}
                       className="group flex items-center px-2 py-2 text-base font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                      onClick={() => setIsSidebarOpen(false)}
                     >
                       {link.name}
                     </Link>
@@ -148,18 +118,9 @@ export default function DashboardLayout({ children }) {
         {/* Sidebar - Desktop */}
         <div className="hidden md:flex md:flex-shrink-0">
           <div className="flex flex-col w-64">
-            <div className="flex flex-col h-0 flex-1 bg-white border-r border-gray-200">
+            <div className="flex flex-col h-screen bg-white border-r border-gray-200 sticky top-0">
               <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
-                <div className="px-4 mb-5 flex items-center">
-                  <Image 
-                    src="/logo-svnit.png" 
-                    alt="SVNIT Logo" 
-                    width={40} 
-                    height={40} 
-                    className="h-8 w-auto"
-                  />
-                  <h2 className="ml-2 text-lg font-medium text-gray-900">Navigation</h2>
-                </div>
+                
                 <nav className="flex-1 px-2 bg-white space-y-1">
                   {navigationLinks.map((link) => (
                     <Link
@@ -174,12 +135,12 @@ export default function DashboardLayout({ children }) {
               </div>
               <div className="flex-shrink-0 flex border-t border-gray-200 p-4">
                 {session?.user && (
-                  <div className="flex items-center">
-                    <div className="ml-3">
-                      <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
+                  <div className="flex items-center w-full">
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-gray-700">
                         {session.user.name}
                       </p>
-                      <p className="text-xs font-medium text-gray-500 group-hover:text-gray-700">
+                      <p className="text-xs font-medium text-gray-500">
                         {session.user.role.replace('_', ' ').toUpperCase()}
                       </p>
                     </div>
@@ -192,7 +153,20 @@ export default function DashboardLayout({ children }) {
 
         {/* Main Content */}
         <div className="flex flex-col w-0 flex-1 overflow-hidden">
-          <main className="flex-1 relative overflow-y-auto focus:outline-none">
+          {/* Mobile Sidebar Toggle Button */}
+          <div className="md:hidden bg-white border-b border-gray-200 px-4 py-3">
+            <button 
+              onClick={toggleSidebar}
+              className="text-gray-600 hover:text-gray-800 flex items-center gap-2"
+            >
+              <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+              <span className="text-sm font-medium">Menu</span>
+            </button>
+          </div>
+          
+          <main className="flex-1 relative overflow-y-auto focus:outline-none bg-gray-100">
             {children}
           </main>
         </div>

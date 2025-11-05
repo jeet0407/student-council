@@ -9,6 +9,7 @@ export const CEVHeader = () => (
     <Image
       src={HEADER_BASE64} // must be valid Base64 string
       style={styles.headerImage}
+      alt="SVNIT Header"
     />
   </View>
 );

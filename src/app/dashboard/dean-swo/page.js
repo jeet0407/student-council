@@ -9,6 +9,7 @@ export default function DeanSWODashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [documents, setDocuments] = useState([]);
+  const [processedDocuments, setProcessedDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -37,15 +38,34 @@ export default function DeanSWODashboard() {
       }
     };
 
+    // Fetch processed documents (approved or rejected by dean_swo)
+    const fetchProcessedDocuments = async () => {
+      try {
+        const response = await fetch('/api/documents');
+        const allDocs = await response.json();
+        
+        // Filter documents that have been processed by dean_swo
+        const processed = allDocs.filter(doc => 
+          doc.status !== 'pending_dean_swo' && 
+          doc.approvalHistory?.some(approval => approval.role === 'dean_swo')
+        );
+        
+        setProcessedDocuments(processed.slice(0, 10)); // Show last 10
+      } catch (error) {
+        console.error('Error fetching processed documents:', error);
+      }
+    };
+
     if (session) {
       fetchDocuments();
+      fetchProcessedDocuments();
     }
   }, [session, status, router]);
 
   if (status === 'loading' || loading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center h-64">
+        <div className="flex items-center justify-center h-64 text-black">
           <div className="text-center">
             <div className="spinner"></div>
             <p className="mt-2">Loading...</p>
@@ -57,61 +77,201 @@ export default function DeanSWODashboard() {
 
   return (
     <DashboardLayout>
-      <div className="container mx-auto px-4 py-6">
-        <h1 className="text-2xl font-bold mb-6">Dean SWO Dashboard</h1>
+      <div className="container mx-auto px-3 sm:px-4 md:px-6 py-4 md:py-6 text-black">
+        <h1 className="text-xl sm:text-2xl font-bold mb-4 md:mb-6">Dean SWO Dashboard</h1>
 
         <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="p-6">
-            <h2 className="text-xl font-semibold mb-4">Pending Documents</h2>
+          <div className="p-3 sm:p-4 md:p-6">
+            <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Pending Documents</h2>
             
             {documents.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
+              <div className="text-center py-8 text-gray-500 text-sm sm:text-base">
                 <p>No pending documents requiring your approval.</p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Club</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Faculty Approved</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submitted On</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {documents.map((doc) => (
-                      <tr key={doc._id}>
-                        <td className="px-6 py-4 whitespace-nowrap">{doc.title}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">{doc.clubName}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {doc.signedAt.faculty ? new Date(doc.signedAt.faculty).toLocaleDateString() : 'Pending'}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {new Date(doc.createdAt).toLocaleDateString()}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <button 
-                            onClick={() => router.push(`/dashboard/dean-swo/review/${doc._id}`)}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md text-sm"
-                          >
-                            Review
-                          </button>
-                        </td>
+              <>
+                {/* Desktop Table View */}
+                <div className="hidden md:block overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                        <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Club</th>
+                        <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submitted On</th>
+                        <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {documents.map((doc) => {
+                        
+                        return (
+                          <tr key={doc._id}>
+                            <td className="px-4 lg:px-6 py-4 whitespace-nowrap">{doc.title}</td>
+                            <td className="px-4 lg:px-6 py-4 whitespace-nowrap">{doc.clubName}</td>
+                            
+                            <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                              {new Date(doc.createdAt).toLocaleDateString()}
+                            </td>
+                            <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                              <button 
+                                onClick={() => router.push(`/dashboard/dean-swo/review/${doc._id}`)}
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md text-sm cursor-pointer"
+                              >
+                                Review
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Mobile Card View */}
+                <div className="md:hidden space-y-4">
+                  {documents.map((doc) => (
+                    <div key={doc._id} className="border border-gray-200 rounded-lg p-4 bg-white">
+                      <div className="mb-3">
+                        <h3 className="font-semibold text-black text-base mb-2">{doc.title}</h3>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">Club:</span>
+                            <span className="text-black font-medium">{doc.clubName}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">Submitted:</span>
+                            <span className="text-black">{new Date(doc.createdAt).toLocaleDateString()}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <button 
+                        onClick={() => router.push(`/dashboard/dean-swo/review/${doc._id}`)}
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm cursor-pointer"
+                      >
+                        Review Document
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </>
             )}
           </div>
         </div>
 
-        <div className="mt-6 bg-white rounded-lg shadow overflow-hidden">
-          <div className="p-6">
-            <h2 className="text-xl font-semibold mb-4">Recently Processed Documents</h2>
-            {/* Similar table for recently processed documents */}
+        <div className="mt-4 md:mt-6 bg-white rounded-lg shadow overflow-hidden">
+          <div className="p-3 sm:p-4 md:p-6">
+            <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Recently Processed Documents</h2>
+            
+            {processedDocuments.length === 0 ? (
+              <div className="text-center py-8 text-gray-500 text-sm sm:text-base">
+                <p>No processed documents yet.</p>
+              </div>
+            ) : (
+              <>
+                {/* Desktop Table View */}
+                <div className="hidden lg:block overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                        <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Club</th>
+                        <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Your Action</th>
+                        <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {processedDocuments.map((doc) => {
+                        const deanSWOApproval = doc.approvalHistory?.find(a => a.role === 'dean_swo');
+                        return (
+                          <tr key={doc._id}>
+                            <td className="px-4 lg:px-6 py-4 whitespace-nowrap">{doc.title}</td>
+                            <td className="px-4 lg:px-6 py-4 whitespace-nowrap">{doc.clubName}</td>
+                            <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                              <span className={`px-2 py-1 rounded text-xs ${
+                                doc.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                                doc.status === 'passed' ? 'bg-green-100 text-green-800' :
+                                'bg-blue-100 text-blue-800'
+                              }`}>
+                                {doc.status.replace(/_/g, ' ').toUpperCase()}
+                              </span>
+                            </td>
+                            <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                              <span className={`px-2 py-1 rounded text-xs font-medium ${
+                                deanSWOApproval?.action === 'approved' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                              }`}>
+                                {deanSWOApproval?.action === 'approved' ? 'APPROVED' : 'REJECTED'}
+                              </span>
+                            </td>
+                            <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                              {deanSWOApproval ? new Date(deanSWOApproval.approvedAt).toLocaleDateString() : 'N/A'}
+                            </td>
+                            <td className="px-4 lg:px-6 py-4 whitespace-nowrap">
+                              <button 
+                                onClick={() => router.push(`/dashboard/dean-swo/review/${doc._id}`)}
+                                className="text-blue-600 hover:text-blue-800 text-sm cursor-pointer"
+                              >
+                                View
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Mobile/Tablet Card View */}
+                <div className="lg:hidden space-y-4">
+                  {processedDocuments.map((doc) => {
+                    const deanSWOApproval = doc.approvalHistory?.find(a => a.role === 'dean_swo');
+                    return (
+                      <div key={doc._id} className="border border-gray-200 rounded-lg p-4 bg-white">
+                        <div className="flex justify-between items-start mb-3">
+                          <h3 className="font-semibold text-black text-base flex-1 mr-2">{doc.title}</h3>
+                          <span className={`px-2 py-1 rounded text-xs whitespace-nowrap ${
+                            doc.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                            doc.status === 'passed' ? 'bg-green-100 text-green-800' :
+                            'bg-blue-100 text-blue-800'
+                          }`}>
+                            {doc.status.replace(/_/g, ' ').toUpperCase()}
+                          </span>
+                        </div>
+                        
+                        <div className="space-y-2 text-sm mb-3">
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">Club:</span>
+                            <span className="text-black font-medium">{doc.clubName}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">Your Action:</span>
+                            <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                              deanSWOApproval?.action === 'approved' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                            }`}>
+                              {deanSWOApproval?.action === 'approved' ? 'APPROVED' : 'REJECTED'}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">Date:</span>
+                            <span className="text-black">
+                              {deanSWOApproval ? new Date(deanSWOApproval.approvedAt).toLocaleDateString() : 'N/A'}
+                            </span>
+                          </div>
+                        </div>
+
+                        <button 
+                          onClick={() => router.push(`/dashboard/dean-swo/review/${doc._id}`)}
+                          className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm cursor-pointer"
+                        >
+                          View Details
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

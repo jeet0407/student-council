@@ -31,25 +31,28 @@ export async function GET(req, { params }) {
 
     // Authorization based on role
     if (session.user.role === 'student_head') {
-      // Students can only access their own documents
+      // Students can only access their own documents (including drafts)
       // Handle both populated and non-populated createdBy
       const createdById = document.createdBy._id || document.createdBy;
       if (createdById.toString() !== user._id.toString()) {
         return NextResponse.json({ error: 'Access denied' }, { status: 403 });
       }
     } else if (session.user.role === 'faculty') {
-      // Faculty can only access documents in pending_faculty status
-      if (document.status !== 'pending_faculty') {
+      // Faculty can access pending documents or documents they've already processed
+      const hasFacultyApproval = document.approvalHistory?.some(a => a.role === 'faculty');
+      if (document.status !== 'pending_faculty' && !hasFacultyApproval) {
         return NextResponse.json({ error: 'Access denied' }, { status: 403 });
       }
     } else if (session.user.role === 'dean_swo') {
-      // Dean SWO can only access documents in pending_dean_swo status
-      if (document.status !== 'pending_dean_swo') {
+      // Dean SWO can access pending documents or documents they've already processed
+      const hasDeanSWOApproval = document.approvalHistory?.some(a => a.role === 'dean_swo');
+      if (document.status !== 'pending_dean_swo' && !hasDeanSWOApproval) {
         return NextResponse.json({ error: 'Access denied' }, { status: 403 });
       }
     } else if (session.user.role === 'dean_sw') {
-      // Dean SW can only access documents in pending_dean_sw status
-      if (document.status !== 'pending_dean_sw') {
+      // Dean SW can access pending documents or documents they've already processed
+      const hasDeanSWApproval = document.approvalHistory?.some(a => a.role === 'dean_sw');
+      if (document.status !== 'pending_dean_sw' && !hasDeanSWApproval) {
         return NextResponse.json({ error: 'Access denied' }, { status: 403 });
       }
     }
@@ -88,20 +91,20 @@ export async function PUT(req, { params }) {
 
     // Authorization checks based on document status and user role
     if (session.user.role === 'student_head') {
-      // Student head can only update own documents in pending_student_signature status
+      // Student head can only update own documents in draft status
       // Handle both populated and non-populated createdBy
       const createdById = document.createdBy._id || document.createdBy;
       if (createdById.toString() !== user._id.toString() || 
-          document.status !== 'pending_student_signature') {
+          document.status !== 'draft') {
         return NextResponse.json({ error: 'Access denied' }, { status: 403 });
       }
       
-      // If student is signing, update status
-      if (updateData.signatures?.student) {
-        document.signatures.student = updateData.signatures.student;
-        document.status = 'pending_faculty';
-        document.pdfVersions.studentSigned = updateData.pdfVersions?.studentSigned || document.pdfVersions.studentSigned;
-      }
+      // Update document fields
+      Object.keys(updateData).forEach(key => {
+        if (key !== '_id' && key !== 'createdBy' && key !== 'createdAt' && key !== 'status') {
+          document[key] = updateData[key];
+        }
+      });
     } else if (session.user.role === 'faculty') {
       // Faculty can only update documents in pending_faculty status
       if (document.status !== 'pending_faculty') {
@@ -146,7 +149,7 @@ export async function PUT(req, { params }) {
         document.rejectedBy = user._id;
       } else if (updateData.signatures?.deanSW) {
         document.signatures.deanSW = updateData.signatures.deanSW;
-        document.status = 'completed';
+        document.status = 'passed';
         document.signedAt.deanSW = new Date();
         document.pdfVersions.final = updateData.pdfVersions?.final || document.pdfVersions.final;
       }

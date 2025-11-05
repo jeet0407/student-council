@@ -106,14 +106,14 @@ const DocumentSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: [
-      'pending_student_signature',
+      'draft',
       'pending_faculty',
       'pending_dean_swo',
       'pending_dean_sw',
-      'completed',
+      'passed',
       'rejected'
     ],
-    default: 'pending_student_signature',
+    default: 'draft',
   },
   feedback: {
     type: String,
@@ -127,6 +127,33 @@ const DocumentSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
   },
+  rejectedAt: {
+    type: Date,
+  },
+  approvalHistory: [{
+    approvedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    role: {
+      type: String,
+      enum: ['faculty', 'dean_swo', 'dean_sw'],
+      required: true,
+    },
+    approvedAt: {
+      type: Date,
+      default: Date.now,
+    },
+    action: {
+      type: String,
+      enum: ['approved', 'rejected'],
+      required: true,
+    },
+    feedback: {
+      type: String,
+    },
+  }],
   pdfVersions: {
     base: { type: String }, // Path to base PDF
     studentSigned: { type: String }, // Path after student signed
@@ -154,5 +181,10 @@ const DocumentSchema = new mongoose.Schema({
     default: Date.now,
   },
 });
+
+// Add indexes for better query performance
+DocumentSchema.index({ status: 1, createdAt: -1 });
+DocumentSchema.index({ createdBy: 1, createdAt: -1 });
+DocumentSchema.index({ status: 1, eventDate: 1 });
 
 export default mongoose.models.Document || mongoose.model('Document', DocumentSchema);

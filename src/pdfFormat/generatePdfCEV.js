@@ -270,10 +270,10 @@ export const CEVConfig = {
       sectionTitle: 'Financial Proposal',
       columns: [
         { key: 'item', label: 'Item/Description', width: '70%' },
-        { key: 'amount', label: 'Amount (₹)', width: '30%', align: 'right' },
+        { key: 'amount', label: 'Amount', width: '30%', align: 'right' },
       ],
       showTotal: true,
-      currency: '₹',
+      currency: '',
     },
     
     officeUse: {
@@ -373,7 +373,7 @@ export const CEVHelpers = {
     return items.reduce((total, item) => total + (Number(item.amount || 0)), 0).toFixed(2);
   },
   
-  formatCurrency: (amount, currency = '₹') => {
+  formatCurrency: (amount, currency = '') => {
     return `${currency}${Number(amount || 0).toFixed(2)}`;
   },
   

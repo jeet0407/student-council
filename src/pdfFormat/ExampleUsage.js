@@ -302,7 +302,7 @@ export default function DocumentPreview({ params }) {
   if (status === 'loading' || loading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center h-64">
+        <div className="flex items-center text-black justify-center h-64">
           <div className="text-center">
             <div className="spinner h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
             <p className="mt-2">Loading document...</p>

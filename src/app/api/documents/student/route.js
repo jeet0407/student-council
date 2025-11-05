@@ -15,13 +15,14 @@ export async function GET(req) {
     await dbConnect();
     
     // Get current user
-    const user = await User.findOne({ email: session.user.email });
+    const user = await User.findOne({ email: session.user.email }).select('_id').lean();
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // Fetch documents created by this user
+    // Fetch only essential fields for listing
     const documents = await Document.find({ createdBy: user._id })
+      .select('title clubName status createdAt eventDate documentNumber approvalHistory feedback')
       .sort({ createdAt: -1 }) // Most recent first
       .lean();
     

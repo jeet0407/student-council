@@ -199,7 +199,7 @@ export default function NewDocument() {
   if (status === 'loading') {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center h-64">
+        <div className="flex items-center justify-center h-64 text-black">
           <div className="text-center">
             <div className="spinner"></div>
             <p className="mt-2">Loading...</p>
@@ -216,19 +216,19 @@ export default function NewDocument() {
   
   return (
     <DashboardLayout>
-      <div className="container mx-auto px-4 py-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl text-black font-bold">Create New Document</h1>
+      <div className="container mx-auto px-3 sm:px-4 md:px-6 py-4 md:py-6">
+        <div className="flex justify-between items-center mb-4 md:mb-6">
+          <h1 className="text-xl sm:text-2xl text-black font-bold">Create New Document</h1>
         </div>
         
-        <div className="bg-white shadow-md rounded-lg p-6 mb-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="bg-white shadow-md rounded-lg p-3 sm:p-4 md:p-6 mb-6 md:mb-8">
+          <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
             {/* Document Information */}
-            <div className="bg-gray-50 p-4 rounded-md mb-6">
-              <h2 className="text-lg font-semibold mb-4 text-gray-800">Document Information</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-gray-50 p-3 sm:p-4 rounded-md mb-4 md:mb-6">
+              <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-800">Document Information</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
-                  <label htmlFor="documentNumber" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="documentNumber" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                     Document No. (format: XX/YYYY-YYYY)
                   </label>
                   <input
@@ -238,10 +238,10 @@ export default function NewDocument() {
                     value={formData.documentNumber}
                     onChange={handleChange}
                     placeholder="07/2024-2025"
-                    className={`w-full px-3 py-2 border ${errors.documentNumber ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black`}
+                    className={`w-full px-3 py-2 text-sm border ${errors.documentNumber ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black`}
                   />
                   {errors.documentNumber && (
-                    <p className="mt-1 text-sm text-red-600">{errors.documentNumber}</p>
+                    <p className="mt-1 text-xs sm:text-sm text-red-600">{errors.documentNumber}</p>
                   )}
                 </div>
                 
@@ -264,7 +264,7 @@ export default function NewDocument() {
               </div>
               
               <div className="mt-4">
-                <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="subject" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
                   Subject
                 </label>
                 <input
@@ -274,18 +274,18 @@ export default function NewDocument() {
                   value={formData.subject}
                   onChange={handleChange}
                   placeholder="Permission to Conduct Event with Financial Support"
-                  className={`w-full px-3 py-2 border ${errors.subject ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black`}
+                  className={`w-full px-3 py-2 text-sm border ${errors.subject ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black`}
                 />
                 {errors.subject && (
-                  <p className="mt-1 text-sm text-red-600">{errors.subject}</p>
+                  <p className="mt-1 text-xs sm:text-sm text-red-600">{errors.subject}</p>
                 )}
               </div>
             </div>
             
             {/* Club Information */}
-            <div className="bg-gray-50 p-4 rounded-md mb-6">
-              <h2 className="text-lg font-semibold mb-4 text-gray-800">Club Information</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-gray-50 p-3 sm:p-4 rounded-md mb-4 md:mb-6">
+              <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-800">Club Information</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <label htmlFor="clubName" className="block text-sm font-medium text-gray-700 mb-1">
                     Chapter/Club/Society/Section Name
@@ -325,9 +325,9 @@ export default function NewDocument() {
             </div>
             
             {/* Event Information */}
-            <div className="bg-gray-50 p-4 rounded-md mb-6">
-              <h2 className="text-lg font-semibold mb-4 text-gray-800">Event Information</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-gray-50 p-3 sm:p-4 rounded-md mb-4 md:mb-6">
+              <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-800">Event Information</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <label htmlFor="eventSchedule" className="block text-sm font-medium text-gray-700 mb-1">
                     Schedule of Event (Date, Day)
@@ -447,9 +447,9 @@ export default function NewDocument() {
             </div>
             
             {/* Participation Information */}
-            <div className="bg-gray-50 p-4 rounded-md mb-6">
-              <h2 className="text-lg font-semibold mb-4 text-gray-800">Participation Information</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-gray-50 p-3 sm:p-4 rounded-md mb-4 md:mb-6">
+              <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-800">Participation Information</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <label htmlFor="targetAudience" className="block text-sm font-medium text-gray-700 mb-1">
                     Target Audience
@@ -507,21 +507,80 @@ export default function NewDocument() {
             </div>
 
             {/* Financial Proposal dynamic table */}
-            <div className="bg-gray-50 p-4 rounded-md mb-6">
-              <h2 className="text-lg font-semibold mb-4 text-gray-800">Financial Proposal</h2>
-              <div className="overflow-x-auto">
+            <div className="bg-gray-50 p-3 sm:p-4 rounded-md mb-4 md:mb-6">
+              <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-800">Financial Proposal</h2>
+              
+              {/* Mobile Card View */}
+              <div className="md:hidden space-y-4">
+                {formData.financialProposal.map((row, index) => (
+                  <div key={index} className="bg-white p-3 rounded-md border border-gray-200">
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Item/Description</label>
+                        <input
+                          type="text"
+                          value={row.item}
+                          onChange={(e) => {
+                            const newFinancialProposal = [...formData.financialProposal];
+                            newFinancialProposal[index].item = e.target.value;
+                            setFormData({ ...formData, financialProposal: newFinancialProposal });
+                          }}
+                          placeholder="Enter item/description"
+                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Amount</label>
+                        <input
+                          type="number"
+                          value={row.amount}
+                          onChange={(e) => {
+                            const newFinancialProposal = [...formData.financialProposal];
+                            newFinancialProposal[index].amount = e.target.value;
+                            setFormData({ ...formData, financialProposal: newFinancialProposal });
+                          }}
+                          placeholder="0"
+                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newFinancialProposal = formData.financialProposal.filter((_, i) => i !== index);
+                          setFormData({ ...formData, financialProposal: newFinancialProposal });
+                        }}
+                        className="w-full text-red-600 hover:text-red-900 font-medium text-sm py-2 border border-red-300 rounded-md"
+                        disabled={formData.financialProposal.length === 1}
+                      >
+                        Remove Item
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                <div className="bg-blue-50 p-3 rounded-md border border-blue-200">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-semibold text-gray-800">Total:</span>
+                    <span className="text-base font-bold text-blue-600">
+                      {formData.financialProposal.reduce((total, row) => total + (parseFloat(row.amount) || 0), 0).toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Desktop Table View */}
+              <div className="hidden md:block overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200 bg-white rounded-md shadow">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item/Description</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount (₹)</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                      <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item/Description</th>
+                      <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                      <th className="px-4 lg:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {formData.financialProposal.map((row, index) => (
                       <tr key={index}>
-                        <td className="px-6 py-4">
+                        <td className="px-4 lg:px-6 py-4">
                           <input
                             type="text"
                             value={row.item}
@@ -531,10 +590,10 @@ export default function NewDocument() {
                               setFormData({ ...formData, financialProposal: newFinancialProposal });
                             }}
                             placeholder="Enter item/description"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                           />
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-4 lg:px-6 py-4">
                           <input
                             type="number"
                             value={row.amount}
@@ -544,17 +603,17 @@ export default function NewDocument() {
                               setFormData({ ...formData, financialProposal: newFinancialProposal });
                             }}
                             placeholder="0"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                           />
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-4 lg:px-6 py-4">
                           <button
                             type="button"
                             onClick={() => {
                               const newFinancialProposal = formData.financialProposal.filter((_, i) => i !== index);
                               setFormData({ ...formData, financialProposal: newFinancialProposal });
                             }}
-                            className="text-red-600 hover:text-red-900 font-medium"
+                            className="text-red-600 hover:text-red-900 font-medium text-sm"
                             disabled={formData.financialProposal.length === 1}
                           >
                             Remove
@@ -564,15 +623,16 @@ export default function NewDocument() {
                     ))}
                     {/* Total row */}
                     <tr className="bg-gray-50 font-semibold">
-                      <td className="px-6 py-4 text-right text-black">Total:</td>
-                      <td className="px-6 py-4 text-black">
-                        ₹{formData.financialProposal.reduce((total, row) => total + (parseFloat(row.amount) || 0), 0).toLocaleString()}
+                      <td className="px-4 lg:px-6 py-4 text-right text-black">Total:</td>
+                      <td className="px-4 lg:px-6 py-4 text-black">
+                        {formData.financialProposal.reduce((total, row) => total + (parseFloat(row.amount) || 0), 0).toLocaleString()}
                       </td>
-                      <td className="px-6 py-4"></td>
+                      <td className="px-4 lg:px-6 py-4"></td>
                     </tr>
                   </tbody>
                 </table>
               </div>
+              
               <div className="mt-4">
                 <button
                   type="button"
@@ -580,20 +640,20 @@ export default function NewDocument() {
                     const newFinancialProposal = [...formData.financialProposal, { item: '', amount: '' }];
                     setFormData({ ...formData, financialProposal: newFinancialProposal });
                   }}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
                   + Add Row
                 </button>
               </div>
               {errors.financialProposal && (
-                <p className="mt-2 text-sm text-red-600">{errors.financialProposal}</p>
+                <p className="mt-2 text-xs sm:text-sm text-red-600">{errors.financialProposal}</p>
               )}
             </div>
 
             {/* Student Head Information */}
-            <div className="bg-gray-50 p-4 rounded-md mb-6">
-              <h2 className="text-lg font-semibold mb-4 text-gray-800">Student Head Information</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-gray-50 p-3 sm:p-4 rounded-md mb-4 md:mb-6">
+              <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-800">Student Head Information</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <label htmlFor="studentHeadName" className="block text-sm font-medium text-gray-700 mb-1">
                     Student Head Name
@@ -669,9 +729,9 @@ export default function NewDocument() {
             </div>
             
             {/* Student Secretary Information */}
-            <div className="bg-gray-50 p-4 rounded-md mb-6">
-              <h2 className="text-lg font-semibold mb-4 text-gray-800">Student Secretary Information</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-gray-50 p-3 sm:p-4 rounded-md mb-4 md:mb-6">
+              <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-800">Student Secretary Information</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <label htmlFor="studentSecretaryName" className="block text-sm font-medium text-gray-700 mb-1">
                     Student Secretary Name
@@ -747,9 +807,9 @@ export default function NewDocument() {
             </div>
             
             {/* Faculty Co-Chairman 1 */}
-            <div className="bg-gray-50 p-4 rounded-md mb-6">
-              <h2 className="text-lg font-semibold mb-4 text-gray-800">Faculty Co-Chairman 1</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-gray-50 p-3 sm:p-4 rounded-md mb-4 md:mb-6">
+              <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-800">Faculty Co-Chairman 1</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <label htmlFor="facultyCoChairman1Name" className="block text-sm font-medium text-gray-700 mb-1">
                     Faculty Co-Chairman 1 Name
@@ -825,9 +885,9 @@ export default function NewDocument() {
             </div>
             
             {/* Faculty Co-Chairman 2 */}
-            <div className="bg-gray-50 p-4 rounded-md mb-6">
-              <h2 className="text-lg font-semibold mb-4 text-gray-800">Faculty Co-Chairman 2</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-gray-50 p-3 sm:p-4 rounded-md mb-4 md:mb-6">
+              <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-800">Faculty Co-Chairman 2</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <label htmlFor="facultyCoChairman2Name" className="block text-sm font-medium text-gray-700 mb-1">
                     Faculty Co-Chairman 2 Name
@@ -903,9 +963,9 @@ export default function NewDocument() {
             </div>
             
             {/* Faculty Chairman */}
-            <div className="bg-gray-50 p-4 rounded-md mb-6">
-              <h2 className="text-lg font-semibold mb-4 text-gray-800">Faculty Chairman</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-gray-50 p-3 sm:p-4 rounded-md mb-4 md:mb-6">
+              <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-gray-800">Faculty Chairman</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <label htmlFor="facultyChairmanName" className="block text-sm font-medium text-gray-700 mb-1">
                     Faculty Chairman Name
@@ -981,11 +1041,11 @@ export default function NewDocument() {
             </div>
             
             {/* Form Actions */}
-            <div className="flex justify-end space-x-4">
+            <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4 mt-6">
               <button
                 type="button"
                 onClick={() => router.push('/dashboard/student')}
-                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 Cancel
               </button>
@@ -993,7 +1053,7 @@ export default function NewDocument() {
                 type="button"
                 onClick={handleReview}
                 disabled={isLoading}
-                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="w-full sm:w-auto px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? 'Processing...' : 'Review Document'}
               </button>

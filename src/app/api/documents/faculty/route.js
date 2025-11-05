@@ -14,12 +14,14 @@ export async function GET(req) {
 
     await dbConnect();
     
-    // Fetch documents pending faculty approval
+    // Fetch only essential fields for listing
     const documents = await Document.find({ 
       status: 'pending_faculty' 
     })
+    .select('title clubName status createdAt eventDate documentNumber createdBy')
     .populate('createdBy', 'name email')
     .sort({ createdAt: -1 })
+    .limit(50) // Limit to recent 50 pending documents
     .lean();
     
     return NextResponse.json(documents);
